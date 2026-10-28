@@ -14,29 +14,41 @@ export const Logo: React.FC<LogoProps> = ({
   size = "md",
   showText = true,
 }) => {
+  // Support both Logo.png and logo.png
+  const [logoSrc, setLogoSrc] = useState("/Logo.png");
   const [imageError, setImageError] = useState(false);
 
   const dimensionClasses = {
-    sm: "w-7 h-7",
-    md: "w-9 h-9",
-    lg: "w-12 h-12",
+    sm: "w-8 h-8",
+    md: "w-10 h-10",
+    lg: "w-14 h-14",
+  };
+
+  const handleImageError = () => {
+    if (logoSrc === "/Logo.png") {
+      setLogoSrc("/logo.png");
+    } else {
+      setImageError(true);
+    }
   };
 
   return (
     <div className={`flex items-center gap-2.5 group select-none ${className}`}>
-      {/* Logo container using /logo.png directly */}
+      {/* Logo container */}
       <div
-        className={`${dimensionClasses[size]} rounded-2xl overflow-hidden flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 relative bg-stone-900 dark:bg-stone-100`}
+        className={`${dimensionClasses[size]} rounded-2xl overflow-hidden flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 relative bg-transparent`}
       >
         {!imageError ? (
           <img
-            src="/logo.png"
+            src={logoSrc}
             alt="Akalin Logo"
-            className="w-full h-full object-contain p-0.5"
-            onError={() => setImageError(true)}
+            className="w-full h-full object-contain"
+            onError={handleImageError}
           />
         ) : (
-          <Box className="w-5 h-5 text-emerald-400 dark:text-emerald-700" />
+          <div className="w-full h-full rounded-2xl bg-stone-900 dark:bg-stone-100 flex items-center justify-center text-white dark:text-stone-900 shadow-sm">
+            <Box className="w-5 h-5 text-emerald-400 dark:text-emerald-700" />
+          </div>
         )}
       </div>
 
