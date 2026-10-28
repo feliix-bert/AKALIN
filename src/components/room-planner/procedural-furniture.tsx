@@ -476,3 +476,4 @@ export const ProceduralFurniture: React.FC<ProceduralFurnitureProps> = ({
       );
   }
 };
+

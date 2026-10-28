@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Box, Lock, Mail, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
+import { Lock, Mail, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -67,14 +68,11 @@ export default function LoginPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md p-8 rounded-3xl bg-white dark:bg-[#1E2126] border border-stone-200/80 dark:border-stone-800 shadow-elevated space-y-6">
         {/* Brand Header */}
-        <div className="text-center space-y-2">
-          <div className="w-10 h-10 rounded-2xl bg-stone-900 text-white flex items-center justify-center mx-auto shadow-sm">
-            <Box className="w-5 h-5 text-emerald-400" />
-          </div>
-          <h1 className="text-2xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight">
-            Masuk ke Akalin
-          </h1>
-          <p className="text-xs text-stone-500">
+        <div className="flex flex-col items-center text-center space-y-2">
+          <Link href="/">
+            <Logo size="lg" />
+          </Link>
+          <p className="text-xs text-stone-500 pt-1">
             Akses desain 3D kamarmu dan simpan ide penataan favorit.
           </p>
         </div>
@@ -163,3 +161,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

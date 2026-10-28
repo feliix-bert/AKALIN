@@ -50,3 +50,4 @@ ON CONFLICT (slug) DO UPDATE SET
     height = EXCLUDED.height,
     thumbnail_url = EXCLUDED.thumbnail_url,
     price_estimate = EXCLUDED.price_estimate;
+

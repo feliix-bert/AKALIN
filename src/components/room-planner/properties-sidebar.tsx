@@ -417,3 +417,4 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
     </aside>
   );
 };
+

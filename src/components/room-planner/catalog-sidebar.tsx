@@ -166,3 +166,4 @@ export const CatalogSidebar: React.FC<CatalogSidebarProps> = ({ onCloseMobile })
     </aside>
   );
 };
+

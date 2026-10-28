@@ -141,3 +141,4 @@ test("Scene Serialization & Deserialization: Validates schema integrity", () => 
   assert.equal(deserialized.lighting.preset, "daylight");
   assert.equal(deserialized.floorTexture, "wood");
 });
+

@@ -571,3 +571,4 @@ export const MOCK_INSPIRATIONS: Inspiration[] = [
     },
   },
 ];
+

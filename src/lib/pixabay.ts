@@ -37,3 +37,4 @@ export async function searchPixabayImages(
     return [];
   }
 }
+

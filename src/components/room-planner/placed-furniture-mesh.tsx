@@ -151,3 +151,4 @@ export const PlacedFurnitureMesh: React.FC<PlacedFurnitureMeshProps> = ({ item }
     </group>
   );
 };
+

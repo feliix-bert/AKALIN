@@ -161,3 +161,4 @@ akalin/
 
 ## 📄 Lisensi
 Hak Cipta © 2026 Akalin. Dibuat dengan cinta untuk solusi hunian cerdas dan terjangkau di Indonesia.
+

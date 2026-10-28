@@ -278,3 +278,4 @@ VALUES ('inspirations', 'inspirations', true),
        ('avatars', 'avatars', true),
        ('room-previews', 'room-previews', true)
 ON CONFLICT (id) DO NOTHING;
+

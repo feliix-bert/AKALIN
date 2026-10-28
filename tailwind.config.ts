@@ -81,8 +81,12 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "monospace"],
+        sans: ["var(--font-plus-jakarta)", "var(--font-poppins)", "system-ui", "sans-serif"],
+        heading: ["var(--font-plus-jakarta)", "var(--font-montserrat)", "sans-serif"],
+        display: ["var(--font-montserrat)", "var(--font-poppins)", "sans-serif"],
+        jakarta: ["var(--font-plus-jakarta)", "sans-serif"],
+        poppins: ["var(--font-poppins)", "sans-serif"],
+        montserrat: ["var(--font-montserrat)", "sans-serif"],
       },
       boxShadow: {
         subtle: "0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04)",

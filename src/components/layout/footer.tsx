@@ -3,7 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Box, Heart } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
+import { Heart } from "lucide-react";
 
 export const Footer: React.FC = () => {
   const pathname = usePathname();
@@ -18,13 +19,8 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
           <div className="space-y-3">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-stone-900 dark:bg-stone-100 flex items-center justify-center text-white dark:text-stone-900">
-                <Box className="w-4 h-4 text-emerald-400 dark:text-emerald-700" />
-              </div>
-              <span className="font-extrabold text-base tracking-tight text-stone-900 dark:text-stone-100">
-                Akalin<span className="text-emerald-600">.</span>
-              </span>
+            <Link href="/">
+              <Logo />
             </Link>
             <p className="text-xs text-stone-500 leading-relaxed">
               Platform inspirasi dan penataan kamar kost cerdas dengan 3D Interactive Room Planner.
@@ -117,3 +113,4 @@ export const Footer: React.FC = () => {
     </footer>
   );
 };
+

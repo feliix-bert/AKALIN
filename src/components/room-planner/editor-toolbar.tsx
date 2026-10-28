@@ -235,3 +235,4 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
     </header>
   );
 };
+

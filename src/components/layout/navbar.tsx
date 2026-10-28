@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Logo } from "@/components/ui/logo";
 import {
   Compass,
   Box,
@@ -36,19 +37,9 @@ export const Navbar: React.FC = () => {
     <nav className="sticky top-0 z-40 w-full bg-[#FAF9F6]/90 dark:bg-[#121316]/90 backdrop-blur-md border-b border-stone-200/80 dark:border-stone-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo / Brand */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-2xl bg-stone-900 dark:bg-stone-100 flex items-center justify-center text-white dark:text-stone-900 shadow-sm group-hover:scale-105 transition-transform">
-              <Box className="w-5 h-5 text-emerald-400 dark:text-emerald-700" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-lg tracking-tight text-stone-900 dark:text-stone-100 leading-none">
-                Akalin<span className="text-emerald-600">.</span>
-              </span>
-              <span className="text-[10px] text-stone-500 font-medium tracking-wide">
-                Ruang Kos Cerdas
-              </span>
-            </div>
+          {/* Logo / Brand with /logo.png */}
+          <Link href="/">
+            <Logo />
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -199,3 +190,4 @@ export const Navbar: React.FC = () => {
     </nav>
   );
 };
+

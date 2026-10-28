@@ -71,8 +71,13 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-emerald-100 selection:text-emerald-900;
+    @apply bg-background text-foreground antialiased selection:bg-emerald-100 selection:text-emerald-900 font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-plus-jakarta), var(--font-montserrat), sans-serif;
+    letter-spacing: -0.025em;
   }
 }
 
@@ -96,3 +101,4 @@
 .canvas-container {
   touch-action: none;
 }
+
