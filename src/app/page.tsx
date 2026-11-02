@@ -56,12 +56,6 @@ export default function HomePage() {
       {/* ================= HERO SECTION ================= */}
       <section className="relative pt-12 md:pt-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <div className="text-center max-w-3xl mx-auto space-y-6">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-xs font-semibold shadow-subtle">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Interactive 3D Room Planner untuk Anak Kos & Ruang Sempit</span>
-          </div>
-
           {/* Main Headline */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-[1.15]">
             Temukan inspirasi. <br className="hidden sm:inline" />
