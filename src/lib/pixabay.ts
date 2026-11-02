@@ -13,13 +13,16 @@ export interface PixabayImage {
 const PIXABAY_KEY =
   process.env.PIXABAY_API_KEY ||
   process.env.NEXT_PUBLIC_PIXABAY_API_KEY ||
-  "58283041-c3a2a4e3bea0710cbf6c82436";
+  "";
 
 export async function searchPixabayImages(
   query: string,
   category: string = "interior",
   perPage: number = 12
 ): Promise<PixabayImage[]> {
+  if (!PIXABAY_KEY) {
+    return [];
+  }
   try {
     const encoded = encodeURIComponent(`${query} interior bedroom room design`);
     const res = await fetch(

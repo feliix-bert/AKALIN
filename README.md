@@ -76,8 +76,8 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
-PIXABAY_API_KEY=58283041-c3a2a4e3bea0710cbf6c82436
-NEXT_PUBLIC_PIXABAY_API_KEY=58283041-c3a2a4e3bea0710cbf6c82436
+PIXABAY_API_KEY=your-pixabay-api-key-here
+NEXT_PUBLIC_PIXABAY_API_KEY=your-pixabay-api-key-here
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 > **Catatan**: Jika Supabase URL belum diisi atau masih menggunakan placeholder, Akalin akan otomatis berjalan dalam **Demo & Local Fallback Mode**. Semua fitur 3D Room Planner, simpan desain ke localStorage, katalog, galeri, dan admin panel berfungsi 100% tanpa error!
