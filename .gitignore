@@ -39,3 +39,13 @@ service-account*.json
 *.tsbuildinfo
 next-env.d.ts
 
+# python & triposr local environments
+triposr-server/venv/
+triposr-server/.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+triposr-server/temp/
+triposr-server/*.glb
+
+

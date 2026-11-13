@@ -45,6 +45,10 @@ export const RoomCanvas: React.FC = () => {
             antialias: true,
             powerPreference: "high-performance",
           }}
+          onCreated={(state) => {
+            state.gl.domElement.id = "room-planner-webgl-canvas";
+            state.gl.domElement.classList.add("room-planner-webgl-canvas");
+          }}
           className="canvas-container w-full h-full cursor-grab active:cursor-grabbing"
         >
           <RoomScene />

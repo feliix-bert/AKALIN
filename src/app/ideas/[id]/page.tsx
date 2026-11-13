@@ -20,6 +20,8 @@ import {
   Sparkles,
   Share2,
   Check,
+  ArrowRight,
+  ShieldCheck,
 } from "lucide-react";
 
 export default function InspirationDetailPage() {
@@ -45,7 +47,7 @@ export default function InspirationDetailPage() {
           setIsSaved(savedIds.includes(item.id));
         }
       } catch (err) {
-        console.error(err);
+        console.error("Detail load error:", err);
       } finally {
         setLoading(false);
       }
@@ -60,227 +62,269 @@ export default function InspirationDetailPage() {
   };
 
   const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
   };
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-20 text-center text-xs text-stone-500">
-        Memuat detail inspirasi...
+      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#121316] flex flex-col items-center justify-center p-4">
+        <div className="w-8 h-8 border-2 border-[#009B75] border-t-transparent rounded-full animate-spin" />
+        <span className="mt-4 text-xs font-mono text-[#5E5E52]">
+          Memuat kurasi ruangan...
+        </span>
       </div>
     );
   }
 
   if (!inspiration) {
     return (
-      <div className="max-w-md mx-auto px-4 py-24 text-center space-y-4">
-        <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100">
+      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#121316] flex flex-col items-center justify-center p-4 text-center">
+        <h2 className="text-2xl font-bold text-[#25251F] dark:text-white">
           Inspirasi Tidak Ditemukan
         </h2>
-        <p className="text-xs text-stone-500">
-          Ide desain ruangan yang kamu cari mungkin telah dihapus atau belum disetujui.
+        <p className="mt-2 text-xs text-[#5E5E52] max-w-sm">
+          Ide penataan ini mungkin telah dipindahkan atau belum dipublikasikan.
         </p>
         <Link
           href="/explore"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 text-white text-xs font-semibold"
+          className="mt-6 px-6 py-3 rounded-full bg-[#25251F] text-white text-xs font-bold hover:bg-black transition-all"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Kembali ke Jelajah</span>
+          Kembali ke Jelajah
         </Link>
       </div>
     );
   }
 
+  const length = inspiration.room_length ?? 3.0;
+  const width = inspiration.room_width ?? 3.0;
+
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
-      {/* Top Back & Action Header */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Kembali</span>
-        </button>
-
-        <div className="flex items-center gap-2">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#121316] text-[#25251F] dark:text-stone-100 py-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        {/* Navigation & Action Bar */}
+        <div className="flex items-center justify-between border-b border-[#25251F]/15 dark:border-stone-800 pb-5">
           <button
-            onClick={handleShare}
-            className="p-2.5 rounded-xl border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-100 text-xs flex items-center gap-1.5"
-            title="Salin Tautan"
+            type="button"
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-2 text-xs font-bold text-[#25251F] dark:text-stone-300 hover:text-[#009B75] transition-colors"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
-            <span className="hidden sm:inline">{copied ? "Tersalin" : "Bagikan"}</span>
+            <ArrowLeft className="w-4 h-4" />
+            <span>Kembali</span>
           </button>
 
-          <button
-            onClick={handleToggleSave}
-            className={`px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
-              isSaved
-                ? "bg-rose-500 text-white shadow-sm"
-                : "bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 hover:bg-stone-50"
-            }`}
-          >
-            <Bookmark className={`w-4 h-4 ${isSaved ? "fill-white" : ""}`} />
-            <span>{isSaved ? "Tersimpan" : "Simpan Ide"}</span>
-          </button>
-        </div>
-      </div>
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={handleShare}
+              className="px-4 py-2 rounded-full border border-[#25251F]/15 dark:border-stone-800 bg-white dark:bg-stone-900 text-xs font-bold text-[#25251F] dark:text-stone-200 hover:bg-[#F0EEE7] flex items-center gap-1.5 transition-all shadow-2xs"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-[#009B75]" /> : <Share2 className="w-3.5 h-3.5 text-[#5E5E52]" />}
+              <span>{copied ? "Tautan Disalin!" : "Bagikan"}</span>
+            </button>
 
-      {/* Hero Image Showcase */}
-      <div className="space-y-3">
-        <div className="aspect-[16/9] w-full rounded-3xl overflow-hidden bg-stone-100 dark:bg-stone-800 shadow-elevated relative">
-          <img
-            src={activeImage || inspiration.cover_image_url}
-            alt={inspiration.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-stone-900/80 backdrop-blur-md text-white text-xs font-semibold">
-            {inspiration.category?.name || "Kamar Kos"}
+            <button
+              type="button"
+              onClick={handleToggleSave}
+              className={`px-5 py-2 rounded-full text-xs font-bold flex items-center gap-2 transition-all shadow-2xs ${
+                isSaved
+                  ? "bg-[#009B75] text-[#F4D35E] shadow-sm"
+                  : "bg-white dark:bg-stone-900 border border-[#25251F]/15 dark:border-stone-800 text-[#25251F] dark:text-stone-200 hover:bg-[#F0EEE7]"
+              }`}
+            >
+              <Bookmark className={`w-3.5 h-3.5 ${isSaved ? "fill-[#F4D35E]" : ""}`} />
+              <span className={isSaved ? "text-white" : ""}>{isSaved ? "Tersimpan" : "Simpan Ide"}</span>
+            </button>
           </div>
         </div>
 
-        {/* Gallery Thumbnails (if multiple) */}
-        {inspiration.gallery_images && inspiration.gallery_images.length > 1 && (
-          <div className="flex items-center gap-3 overflow-x-auto pb-2">
-            {inspiration.gallery_images.map((img, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveImage(img)}
-                className={`w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all shrink-0 ${
-                  activeImage === img
-                    ? "border-emerald-600 scale-105 shadow-sm"
-                    : "border-transparent opacity-70 hover:opacity-100"
-                }`}
-              >
-                <img src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
-              </button>
-            ))}
+        {/* Pentagram Editorial Title & Metadata */}
+        <div className="space-y-4 max-w-3xl">
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 rounded-full bg-[#E0F5EE] border border-[#009B75]/20 text-[#006B52] text-[11px] font-bold uppercase tracking-wider">
+              {inspiration.category?.name || "Kamar Kos Cerdas"}
+            </span>
+            <span className="text-xs text-[#5E5E52] font-mono">•</span>
+            <span className="text-xs text-[#25251F] font-mono font-semibold">
+              Skala Dimensi {length.toFixed(1)} × {width.toFixed(1)} m
+            </span>
           </div>
-        )}
-      </div>
 
-      {/* Main Grid: Details & 3D Action Banner */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Title, Instructions, Materials */}
-        <div className="lg:col-span-2 space-y-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight">
-              {inspiration.title}
-            </h1>
-            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 mt-3 leading-relaxed">
-              {inspiration.description}
+          <h1 className="text-3xl sm:text-5xl font-extrabold font-heading text-[#25251F] dark:text-white tracking-tight leading-[1.14]">
+            {inspiration.title}
+          </h1>
+
+          <p className="text-base sm:text-lg text-[#5E5E52] dark:text-stone-300 font-normal leading-relaxed">
+            {inspiration.description}
+          </p>
+
+          {/* Author Byline (Aesop style) */}
+          <div className="pt-2 flex items-center gap-3 text-xs text-[#5E5E52]">
+            <div className="w-7 h-7 rounded-full bg-stone-300 overflow-hidden relative">
+              {inspiration.author?.avatar_url && (
+                <img
+                  src={inspiration.author.avatar_url}
+                  alt={inspiration.author.display_name}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+            <span>
+              Dikurasi oleh{" "}
+              <strong className="text-[#25251F] dark:text-white font-bold">
+                {inspiration.author?.display_name || "Desainer AKALIN"}
+              </strong>
+            </span>
+            <span>•</span>
+            <span className="inline-flex items-center gap-1 text-[#009B75] font-bold">
+              <ShieldCheck className="w-3.5 h-3.5" /> Terverifikasi Pas untuk Kos
+            </span>
+          </div>
+        </div>
+
+        {/* Main Image Showcase */}
+        <div className="space-y-4">
+          <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full rounded-[2rem] overflow-hidden bg-stone-200 shadow-xl border border-[#25251F]/10">
+            <img
+              src={activeImage || inspiration.cover_image_url}
+              alt={inspiration.title}
+              className="w-full h-full object-cover transition-all duration-500"
+            />
+            <div className="absolute bottom-4 left-4 px-3.5 py-1.5 rounded-full bg-[#25251F]/85 backdrop-blur-md text-white text-xs font-mono font-medium">
+              Foto Representasi Sudut Ruangan
+            </div>
+          </div>
+
+          {/* Thumbnail Strip */}
+          {inspiration.gallery_images && inspiration.gallery_images.length > 1 && (
+            <div className="flex items-center gap-3 overflow-x-auto pb-2">
+              {inspiration.gallery_images.map((img, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveImage(img)}
+                  className={`w-24 h-16 rounded-2xl overflow-hidden border-2 transition-all shrink-0 ${
+                    activeImage === img
+                      ? "border-[#009B75] scale-105 shadow-md"
+                      : "border-transparent opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <img
+                    src={img}
+                    alt={`Sudut ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Interactive Handover Banner to 3D Planner */}
+        <div className="rounded-[2rem] bg-[#25251F] text-white p-8 sm:p-10 relative overflow-hidden shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="max-w-xl space-y-2 relative z-10">
+            <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase text-[#009B75] tracking-wider">
+              <Box className="w-4 h-4 text-[#009B75]" />
+              <span>Simulasi Denah Langsung</span>
+            </span>
+            <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Ingin mencoba penataan ini di kamarmu?
+            </h3>
+            <p className="text-xs sm:text-sm text-stone-300 leading-relaxed">
+              Buka ukuran {length.toFixed(1)} × {width.toFixed(1)} m di 3D Room Planner.
+              Kamu bisa menggeser posisi kasur, meja belajar, dan lemari secara bebas.
             </p>
           </div>
 
-          {/* Step-by-Step Instructions */}
-          {inspiration.instructions && inspiration.instructions.length > 0 && (
-            <div className="space-y-4 pt-4 border-t border-stone-200 dark:border-stone-800">
-              <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                <span>Tahapan Penataan Ruangan</span>
-              </h3>
-              <div className="space-y-3">
-                {inspiration.instructions.map((step) => (
-                  <div
-                    key={step.step}
-                    className="p-4 rounded-2xl bg-white dark:bg-[#1E2126] border border-stone-200/70 dark:border-stone-800 flex gap-3.5"
-                  >
-                    <span className="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0">
-                      {step.step}
+          <Link
+            href={`/room-planner?preset=${length <= 3 ? "3x3" : "3x4"}&title=${encodeURIComponent(inspiration.title)}`}
+            className="px-8 py-4 rounded-full bg-[#009B75] hover:bg-[#006B52] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-3 transition-all shadow-lg active:scale-95 shrink-0 relative z-10 group"
+          >
+            <Box className="w-4 h-4 text-[#F4D35E] group-hover:rotate-12 transition-transform" />
+            <span>Buka di Planner 3D</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {/* Two-Column Editorial Details: Materials & Step-by-Step Guide */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 pt-4">
+          {/* Left Column: Material & Budget Breakdown */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 sm:p-8 border border-[#25251F]/15 dark:border-stone-800 shadow-sm">
+              <div className="flex items-center justify-between border-b border-[#25251F]/10 dark:border-stone-800 pb-4 mb-5">
+                <div>
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-[#5E5E52] block font-mono">
+                    Estimasi Total Biaya
+                  </span>
+                  <div className="text-2xl font-black font-mono text-[#009B75] flex items-center gap-2">
+                    <span>{formatRupiah(inspiration.estimated_budget)}</span>
+                    <span className="badge-butter text-[10px] px-2 py-0.5 font-sans font-bold">
+                      Hemat
                     </span>
-                    <div>
-                      <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                        {step.title}
+                  </div>
+                </div>
+                <div className="w-10 h-10 rounded-2xl bg-[#FAF8F5] dark:bg-stone-800 flex items-center justify-center text-[#25251F] dark:text-white">
+                  <Wallet className="w-5 h-5" />
+                </div>
+              </div>
+
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#25251F] dark:text-white mb-4 font-mono">
+                Rincian Perabot & Bahan:
+              </h4>
+
+              <div className="space-y-3">
+                {inspiration.materials.map((mat, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between text-xs py-2 border-b border-stone-100 dark:border-stone-800 last:border-0"
+                  >
+                    <span className="font-semibold text-[#25251F] dark:text-stone-200 pr-2">
+                      {mat.name}
+                    </span>
+                    <span className="font-mono font-bold text-[#5E5E52] shrink-0">
+                      {mat.estimate}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Step-by-Step Layout Philosophy */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 sm:p-8 border border-[#25251F]/15 dark:border-stone-800 shadow-sm space-y-6">
+              <div>
+                <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#009B75]">
+                  Panduan Bertahap
+                </span>
+                <h3 className="text-xl sm:text-2xl font-extrabold text-[#25251F] dark:text-white mt-1">
+                  Filosofi Penataan Ruang
+                </h3>
+                <p className="text-xs text-[#5E5E52] mt-1">
+                  Ikuti urutan langkah ini agar kamar kos tetap rapi dan sirkulasi udara lancar.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                {inspiration.instructions.map((inst) => (
+                  <div key={inst.step} className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-[#FAF8F5] dark:bg-stone-800 border border-[#25251F]/20 dark:border-stone-700 font-mono text-xs font-bold text-[#25251F] dark:text-white flex items-center justify-center shrink-0">
+                      0{inst.step}
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-bold text-[#25251F] dark:text-white">
+                        {inst.title}
                       </h4>
-                      <p className="text-xs text-stone-500 mt-1 leading-relaxed">
-                        {step.description}
+                      <p className="text-xs text-[#5E5E52] leading-relaxed">
+                        {inst.description}
                       </p>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* Materials & Furniture Required */}
-          {inspiration.materials && inspiration.materials.length > 0 && (
-            <div className="space-y-4 pt-4 border-t border-stone-200 dark:border-stone-800">
-              <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                <Layers className="w-5 h-5 text-emerald-600" />
-                <span>Rincian Perabotan & Bahan</span>
-              </h3>
-              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#1E2126] overflow-hidden divide-y divide-stone-100 dark:divide-stone-800">
-                {inspiration.materials.map((mat, idx) => (
-                  <div key={idx} className="p-3 px-4 flex items-center justify-between text-xs">
-                    <span className="font-medium text-stone-800 dark:text-stone-200">
-                      {mat.name}
-                    </span>
-                    {mat.estimate && (
-                      <span className="font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
-                        {mat.estimate}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Right Column: Meta Info Card & 3D Planner CTA */}
-        <div className="space-y-6">
-          {/* Quick Specs Card */}
-          <div className="p-5 rounded-3xl bg-white dark:bg-[#1E2126] border border-stone-200/80 dark:border-stone-800 shadow-card space-y-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-500">
-              Informasi Spesifikasi
-            </h3>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-stone-500 flex items-center gap-2">
-                  <Wallet className="w-4 h-4 text-emerald-600" /> Estimasi Biaya
-                </span>
-                <span className="font-bold text-sm font-mono text-emerald-700 dark:text-emerald-400">
-                  {formatRupiah(inspiration.estimated_budget)}
-                </span>
-              </div>
-
-              {inspiration.room_length && inspiration.room_width && (
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-stone-500 flex items-center gap-2">
-                    <Maximize2 className="w-4 h-4 text-stone-400" /> Ukuran Ruang
-                  </span>
-                  <span className="font-mono font-semibold text-stone-800 dark:text-stone-200">
-                    {inspiration.room_length} x {inspiration.room_width} m
-                  </span>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-stone-500 flex items-center gap-2">
-                  <User className="w-4 h-4 text-stone-400" /> Penata Ruang
-                </span>
-                <span className="font-medium text-stone-800 dark:text-stone-200">
-                  {inspiration.author?.display_name || "Komunitas Akalin"}
-                </span>
-              </div>
-            </div>
-
-            {/* OPEN IN 3D PLANNER BUTTON */}
-            <div className="pt-2">
-              <Link
-                href={`/room-planner`}
-                className="w-full py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
-              >
-                <Box className="w-4 h-4" />
-                <span>Buka di Room Planner 3D</span>
-              </Link>
-              <p className="text-[11px] text-stone-400 text-center mt-2">
-                Simulasikan dan modifikasi susunan tata letak ini secara langsung.
-              </p>
             </div>
           </div>
         </div>
@@ -288,4 +332,3 @@ export default function InspirationDetailPage() {
     </div>
   );
 }
-

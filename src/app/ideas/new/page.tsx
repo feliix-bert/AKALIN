@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { DataService } from "@/lib/data-service";
 import { Category } from "@/types";
+import { createClient } from "@/lib/supabase/client";
 import {
   ArrowLeft,
   Plus,
@@ -17,6 +18,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
+  ArrowRight,
 } from "lucide-react";
 
 const inspirationSchema = z.object({
@@ -56,6 +58,7 @@ export default function NewInspirationPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
+  const [authError, setAuthError] = useState(false);
 
   const {
     register,
@@ -108,6 +111,19 @@ export default function NewInspirationPage() {
 
   useEffect(() => {
     async function fetchCats() {
+      // Check auth — redirect to login if not logged in
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          router.replace("/login?redirect=/ideas/new");
+          return;
+        }
+      } catch {
+        // If Supabase not configured, allow access (offline mode)
+      }
+
       const cats = await DataService.getCategories();
       setCategories(cats);
       if (cats.length > 0) {
@@ -115,7 +131,7 @@ export default function NewInspirationPage() {
       }
     }
     fetchCats();
-  }, [setValue]);
+  }, [setValue, router]);
 
   const onSubmit = async (data: InspirationFormData) => {
     setSubmitting(true);
@@ -126,7 +142,7 @@ export default function NewInspirationPage() {
         .replace(/(^-|-$)/g, "");
 
       await DataService.createInspiration({
-        author_id: "user-current",
+        author_id: "user-current", // auto-resolved to real user.id inside DataService
         category_id: data.category_id,
         title: data.title,
         slug: slug + "-" + Date.now().toString().slice(-4),
@@ -138,10 +154,7 @@ export default function NewInspirationPage() {
         room_width: data.room_width,
         materials: data.materials.map((m) => ({ name: m.name, estimate: m.estimate || "" })),
         instructions: data.instructions,
-        status: "pending", // Pending admin moderation as required!
-        author: {
-          display_name: "Mahasiswa Kreatif",
-        },
+        status: "pending",
       });
 
       setSubmittedSuccess(true);
@@ -157,261 +170,263 @@ export default function NewInspirationPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 w-full space-y-6">
-      {/* Top back */}
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="inline-flex items-center gap-2 text-xs font-semibold text-stone-500 hover:text-stone-900 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Kembali</span>
-      </button>
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#121316] text-[#25251F] dark:text-stone-100 py-10">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-8">
+        {/* Top back */}
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 text-xs font-bold text-[#25251F] dark:text-stone-300 hover:text-[#009B75] transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Kembali</span>
+        </button>
 
-      <div>
-        <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-          Formulir Komunitas
-        </span>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight mt-1">
-          Bagikan Inspirasi Desain Kamarmu
-        </h1>
-        <p className="text-xs text-stone-500 mt-1">
-          Bantu sesama anak kos menata kamar dengan membagikan foto, rincian budget, dan langkah penataanmu.
-        </p>
-      </div>
-
-      {submittedSuccess ? (
-        <div className="p-8 rounded-3xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-center space-y-3">
-          <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-          <h2 className="text-lg font-bold text-emerald-900 dark:text-emerald-200">
-            Inspirasi Berhasil Dikirim!
-          </h2>
-          <p className="text-xs text-emerald-700 dark:text-emerald-300 max-w-md mx-auto leading-relaxed">
-            Karyamu telah masuk antrean moderasi admin (status: pending). Setelah disetujui, inspirasi akan tampil di galeri publik.
+        <div>
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#009B75]">
+            Formulir Komunitas
+          </span>
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-[#25251F] dark:text-white tracking-tight mt-1">
+            Bagikan Inspirasi <span className="font-editorial-serif italic font-normal text-[#009B75]">Kamarmu.</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-[#5E5E52] dark:text-stone-300 mt-2 leading-relaxed">
+            Bantu sesama anak kos menata kamar dengan membagikan foto, rincian budget, dan langkah penataan nyata.
           </p>
         </div>
-      ) : (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Section: Main Info */}
-          <div className="p-6 rounded-3xl bg-white dark:bg-[#1E2126] border border-stone-200/80 dark:border-stone-800 shadow-card space-y-4">
-            <div>
-              <label className="text-xs font-semibold text-stone-700 dark:text-stone-300 block mb-1">
-                Judul Inspirasi *
-              </label>
-              <input
-                type="text"
-                {...register("title")}
-                placeholder="Contoh: Kamar Kos 3x3 Japandi Estetik Hemat Tempat"
-                className="w-full px-4 py-2.5 text-xs bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 rounded-xl focus:ring-2 focus:ring-emerald-600/30 focus:outline-none text-stone-900 dark:text-stone-100"
-              />
-              {errors.title && (
-                <span className="text-[11px] text-red-500 mt-1 block">
-                  {errors.title.message}
-                </span>
-              )}
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300 block mb-1">
-                  Kategori *
-                </label>
-                <select
-                  {...register("category_id")}
-                  className="w-full px-4 py-2.5 text-xs bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none cursor-pointer text-stone-800 dark:text-stone-200"
-                >
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300 block mb-1">
-                  Perkiraan Total Budget (IDR) *
-                </label>
-                <input
-                  type="number"
-                  {...register("estimated_budget", { valueAsNumber: true })}
-                  className="w-full px-4 py-2.5 text-xs bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 rounded-xl font-mono focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-stone-700 dark:text-stone-300 block mb-1">
-                Deskripsi Lengkap *
-              </label>
-              <textarea
-                rows={3}
-                {...register("description")}
-                placeholder="Ceritakan konsep ruangan, trik pencahayaan, atau penataan ruang simpan..."
-                className="w-full px-4 py-2.5 text-xs bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none"
-              />
-              {errors.description && (
-                <span className="text-[11px] text-red-500 mt-1 block">
-                  {errors.description.message}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-stone-700 dark:text-stone-300 block mb-1">
-                URL Foto Cover *
-              </label>
-              <input
-                type="url"
-                {...register("cover_image_url")}
-                placeholder="https://..."
-                className="w-full px-4 py-2.5 text-xs bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none font-mono"
-              />
-            </div>
-
-            {/* Room Dimensions */}
-            <div className="grid grid-cols-2 gap-4 pt-2">
-              <div>
-                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300 block mb-1">
-                  Panjang Ruangan (meter)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  {...register("room_length", { valueAsNumber: true })}
-                  className="w-full px-4 py-2.5 text-xs bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 rounded-xl font-mono focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300 block mb-1">
-                  Lebar Ruangan (meter)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  {...register("room_width", { valueAsNumber: true })}
-                  className="w-full px-4 py-2.5 text-xs bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 rounded-xl font-mono focus:outline-none"
-                />
-              </div>
-            </div>
+        {submittedSuccess ? (
+          <div className="p-8 sm:p-12 rounded-[2rem] bg-[#E0F5EE] border border-[#009B75]/30 text-center space-y-4">
+            <CheckCircle2 className="w-12 h-12 text-[#009B75] mx-auto" />
+            <h2 className="text-xl font-extrabold text-[#006B52]">
+              Inspirasi Berhasil Dikirim!
+            </h2>
+            <p className="text-xs sm:text-sm text-[#006B52] max-w-md mx-auto leading-relaxed">
+              Karyamu telah masuk antrean moderasi admin (status: pending). Setelah diverifikasi, inspirasimu akan tampil di galeri publik.
+            </p>
           </div>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Section: Main Info */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-stone-900 border border-[#25251F]/15 dark:border-stone-800 shadow-2xs space-y-5">
+              <div>
+                <label className="text-xs font-bold text-[#25251F] dark:text-white block mb-1.5">
+                  Judul Inspirasi *
+                </label>
+                <input
+                  type="text"
+                  {...register("title")}
+                  placeholder="Contoh: Kamar Kos 3x3 Japandi Estetik Hemat Tempat"
+                  className="w-full px-4 py-3 text-xs bg-[#FAF8F5] dark:bg-stone-800 border border-[#25251F]/15 dark:border-stone-700 rounded-2xl focus:ring-2 focus:ring-[#009B75]/30 focus:outline-none text-[#25251F] dark:text-white placeholder:text-[#5E5E52]"
+                />
+                {errors.title && (
+                  <span className="text-[11px] text-rose-600 font-semibold mt-1 block">
+                    {errors.title.message}
+                  </span>
+                )}
+              </div>
 
-          {/* Section: Materials List */}
-          <div className="p-6 rounded-3xl bg-white dark:bg-[#1E2126] border border-stone-200/80 dark:border-stone-800 shadow-card space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-stone-800 dark:text-stone-200 uppercase tracking-wider">
-                Daftar Perabotan & Bahan
-              </h3>
-              <button
-                type="button"
-                onClick={() => appendMaterial({ name: "", estimate: "" })}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 text-xs font-medium hover:bg-stone-50"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Tambah Item</span>
-              </button>
-            </div>
-
-            <div className="space-y-2.5">
-              {materialFields.map((field, index) => (
-                <div key={field.id} className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    {...register(`materials.${index}.name` as const)}
-                    placeholder="Nama perabot / bahan"
-                    className="flex-1 px-3.5 py-2 text-xs bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none"
-                  />
-                  <input
-                    type="text"
-                    {...register(`materials.${index}.estimate` as const)}
-                    placeholder="Est. harga (opsional)"
-                    className="w-36 px-3.5 py-2 text-xs bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeMaterial(index)}
-                    className="p-2 rounded-xl text-stone-400 hover:text-red-500 hover:bg-stone-100"
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-[#25251F] dark:text-white block mb-1.5">
+                    Kategori *
+                  </label>
+                  <select
+                    {...register("category_id")}
+                    className="w-full px-4 py-3 text-xs bg-[#FAF8F5] dark:bg-stone-800 border border-[#25251F]/15 dark:border-stone-700 rounded-2xl focus:outline-none cursor-pointer text-[#25251F] dark:text-white font-semibold"
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Section: Step-by-Step Instructions */}
-          <div className="p-6 rounded-3xl bg-white dark:bg-[#1E2126] border border-stone-200/80 dark:border-stone-800 shadow-card space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-stone-800 dark:text-stone-200 uppercase tracking-wider">
-                Langkah-Langkah Penataan
-              </h3>
+                <div>
+                  <label className="text-xs font-bold text-[#25251F] dark:text-white block mb-1.5">
+                    Perkiraan Total Budget (IDR) *
+                  </label>
+                  <input
+                    type="number"
+                    {...register("estimated_budget", { valueAsNumber: true })}
+                    className="w-full px-4 py-3 text-xs bg-[#FAF8F5] dark:bg-stone-800 border border-[#25251F]/15 dark:border-stone-700 rounded-2xl font-mono text-[#25251F] dark:text-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-[#25251F] dark:text-white block mb-1.5">
+                  Deskripsi Lengkap *
+                </label>
+                <textarea
+                  rows={3}
+                  {...register("description")}
+                  placeholder="Ceritakan konsep ruangan, posisi colokan listrik, atau tips penataan ruang simpan..."
+                  className="w-full px-4 py-3 text-xs bg-[#FAF8F5] dark:bg-stone-800 border border-[#25251F]/15 dark:border-stone-700 rounded-2xl focus:outline-none text-[#25251F] dark:text-white placeholder:text-[#5E5E52]"
+                />
+                {errors.description && (
+                  <span className="text-[11px] text-rose-600 font-semibold mt-1 block">
+                    {errors.description.message}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-[#25251F] dark:text-white block mb-1.5">
+                  URL Foto Cover *
+                </label>
+                <input
+                  type="url"
+                  {...register("cover_image_url")}
+                  placeholder="https://images.unsplash.com/..."
+                  className="w-full px-4 py-3 text-xs bg-[#FAF8F5] dark:bg-stone-800 border border-[#25251F]/15 dark:border-stone-700 rounded-2xl focus:outline-none font-mono text-[#25251F] dark:text-white"
+                />
+              </div>
+
+              {/* Room Dimensions */}
+              <div className="grid grid-cols-2 gap-4 pt-1">
+                <div>
+                  <label className="text-xs font-bold text-[#25251F] dark:text-white block mb-1.5">
+                    Panjang Ruangan (meter)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    {...register("room_length", { valueAsNumber: true })}
+                    className="w-full px-4 py-3 text-xs bg-[#FAF8F5] dark:bg-stone-800 border border-[#25251F]/15 dark:border-stone-700 rounded-2xl font-mono text-[#25251F] dark:text-white focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-[#25251F] dark:text-white block mb-1.5">
+                    Lebar Ruangan (meter)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    {...register("room_width", { valueAsNumber: true })}
+                    className="w-full px-4 py-3 text-xs bg-[#FAF8F5] dark:bg-stone-800 border border-[#25251F]/15 dark:border-stone-700 rounded-2xl font-mono text-[#25251F] dark:text-white focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Section: Materials List */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-stone-900 border border-[#25251F]/15 dark:border-stone-800 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-[#25251F] dark:text-white uppercase tracking-wider font-mono">
+                  Daftar Perabotan & Bahan
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => appendMaterial({ name: "", estimate: "" })}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#25251F]/20 text-xs font-bold text-[#25251F] hover:bg-[#F0EEE7]"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Tambah Item</span>
+                </button>
+              </div>
+
+              <div className="space-y-2.5">
+                {materialFields.map((field, index) => (
+                  <div key={field.id} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      {...register(`materials.${index}.name` as const)}
+                      placeholder="Nama perabot / bahan"
+                      className="flex-1 px-4 py-2.5 text-xs bg-[#FAF8F5] dark:bg-stone-800 border border-[#25251F]/15 dark:border-stone-700 rounded-xl focus:outline-none text-[#25251F] dark:text-white"
+                    />
+                    <input
+                      type="text"
+                      {...register(`materials.${index}.estimate` as const)}
+                      placeholder="Est. harga (opsional)"
+                      className="w-36 px-4 py-2.5 text-xs bg-[#FAF8F5] dark:bg-stone-800 border border-[#25251F]/15 dark:border-stone-700 rounded-xl focus:outline-none font-mono text-[#25251F] dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeMaterial(index)}
+                      className="p-2.5 rounded-xl text-stone-400 hover:text-rose-600 hover:bg-rose-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Section: Step-by-Step Instructions */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-stone-900 border border-[#25251F]/15 dark:border-stone-800 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-[#25251F] dark:text-white uppercase tracking-wider font-mono">
+                  Langkah-Langkah Penataan
+                </h3>
+                <button
+                  type="button"
+                  onClick={() =>
+                    appendInstruction({
+                      step: instructionFields.length + 1,
+                      title: "",
+                      description: "",
+                    })
+                  }
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#25251F]/20 text-xs font-bold text-[#25251F] hover:bg-[#F0EEE7]"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Tambah Langkah</span>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {instructionFields.map((field, index) => (
+                  <div
+                    key={field.id}
+                    className="p-4 rounded-2xl bg-[#FAF8F5] dark:bg-stone-800/50 border border-[#25251F]/10 dark:border-stone-800 space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-[#009B75] font-mono">
+                        Langkah {index + 1}
+                      </span>
+                      {instructionFields.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeInstruction(index)}
+                          className="text-stone-400 hover:text-rose-600"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      {...register(`instructions.${index}.title` as const)}
+                      placeholder="Judul langkah (contoh: Posisikan kasur di sudut)"
+                      className="w-full px-3.5 py-2 text-xs bg-white dark:bg-stone-900 border border-[#25251F]/15 dark:border-stone-700 rounded-xl focus:outline-none text-[#25251F] dark:text-white font-semibold"
+                    />
+                    <textarea
+                      rows={2}
+                      {...register(`instructions.${index}.description` as const)}
+                      placeholder="Penjelasan detail..."
+                      className="w-full px-3.5 py-2 text-xs bg-white dark:bg-stone-900 border border-[#25251F]/15 dark:border-stone-700 rounded-xl focus:outline-none text-[#25251F] dark:text-white"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-end pt-2">
               <button
-                type="button"
-                onClick={() =>
-                  appendInstruction({
-                    step: instructionFields.length + 1,
-                    title: "",
-                    description: "",
-                  })
-                }
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 text-xs font-medium hover:bg-stone-50"
+                type="submit"
+                disabled={submitting}
+                className="px-8 py-4 rounded-full bg-[#009B75] hover:bg-[#006B52] text-white text-xs font-bold flex items-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 transition-all active:scale-95"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Tambah Langkah</span>
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                <span>{submitting ? "Mengirimkan..." : "Kirimkan Inspirasi"}</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-
-            <div className="space-y-4">
-              {instructionFields.map((field, index) => (
-                <div
-                  key={field.id}
-                  className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900/40 border border-stone-200/60 dark:border-stone-800 space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-emerald-700">
-                      Langkah {index + 1}
-                    </span>
-                    {instructionFields.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeInstruction(index)}
-                        className="text-stone-400 hover:text-red-500"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    {...register(`instructions.${index}.title` as const)}
-                    placeholder="Judul langkah"
-                    className="w-full px-3.5 py-2 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none"
-                  />
-                  <textarea
-                    rows={2}
-                    {...register(`instructions.${index}.description` as const)}
-                    placeholder="Penjelasan detail..."
-                    className="w-full px-3.5 py-2 text-xs bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <div className="flex justify-end pt-2">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="px-7 py-3.5 rounded-2xl bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-bold hover:bg-stone-800 flex items-center gap-2 shadow-sm disabled:opacity-50"
-            >
-              {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              <span>{submitting ? "Mengirimkan..." : "Kirimkan Inspirasi"}</span>
-            </button>
-          </div>
-        </form>
-      )}
+          </form>
+        )}
+      </div>
     </div>
   );
 }
-

@@ -61,6 +61,7 @@ interface RoomStoreState {
   startPlacing: (furniture: FurnitureItem) => void;
   cancelPlacing: () => void;
   placeItemAt: (pos: [number, number, number]) => void;
+  addGeneratedModel: (params: { name: string; modelUrl: string; dimensions: [number, number, number] }) => void;
   selectItem: (id: string | null) => void;
   updateItemPosition: (id: string, newPos: [number, number, number]) => void;
   updateItemRotation: (id: string, rotY: number) => void;
@@ -264,6 +265,41 @@ export const useRoomStore = create<RoomStoreState>((set, get) => ({
       selectedId: newItem.instanceId,
       isPlacingNew: false,
       itemToPlace: null,
+      collidingIds: collisions,
+      hasUnsavedChanges: true,
+    });
+  },
+
+  addGeneratedModel: ({ name, modelUrl, dimensions }) => {
+    const state = get();
+    const rotation: [number, number, number] = [0, 0, 0];
+    const pos: [number, number, number] = [0, dimensions[1] / 2, 0];
+
+    const clampedPos = clampItemToRoomBounds(
+      pos,
+      rotation,
+      dimensions,
+      state.roomWidth,
+      state.roomLength
+    );
+
+    const newItem: PlacedFurniture = {
+      instanceId: "gen-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6),
+      furnitureId: "generated-" + Date.now(),
+      name,
+      category: "decor",
+      position: clampedPos,
+      rotation,
+      dimensions,
+      model_url: modelUrl,
+    };
+
+    const nextItems = [...state.items, newItem];
+    const collisions = checkItemCollisions(newItem, nextItems);
+
+    set({
+      items: nextItems,
+      selectedId: newItem.instanceId,
       collidingIds: collisions,
       hasUnsavedChanges: true,
     });

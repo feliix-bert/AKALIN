@@ -42,7 +42,7 @@ export interface FurnitureItem {
   height: number; // in meters (Y axis)
   thumbnail_url: string;
   model_url?: string | null;
-  model_type: "procedural" | "glb";
+  model_type: "procedural" | "glb" | "generated";
   price_estimate: number; // in IDR
   is_active: boolean;
   color?: string;
@@ -58,6 +58,7 @@ export interface PlacedFurniture {
   rotation: [number, number, number]; // [x, y, z] in radians
   dimensions: [number, number, number]; // [width, height, depth]
   color?: string;
+  model_url?: string | null; // GLB URL for generated / imported 3D models
 }
 
 export interface RoomLightingConfig {

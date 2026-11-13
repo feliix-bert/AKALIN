@@ -100,8 +100,9 @@ CREATE TABLE IF NOT EXISTS public.furniture_items (
     height NUMERIC(5,2) NOT NULL, -- in meters
     thumbnail_url TEXT NOT NULL,
     model_url TEXT,
-    model_type TEXT NOT NULL DEFAULT 'procedural', -- 'procedural' | 'glb'
+    model_type TEXT NOT NULL DEFAULT 'procedural', -- 'procedural' | 'glb' | 'generated'
     price_estimate NUMERIC(12,2), -- in IDR
+    color TEXT DEFAULT '#E2DCD5',
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
@@ -158,6 +159,7 @@ CREATE INDEX IF NOT EXISTS idx_inspirations_status ON public.inspirations(status
 CREATE INDEX IF NOT EXISTS idx_inspirations_category ON public.inspirations(category_id);
 CREATE INDEX IF NOT EXISTS idx_inspirations_author ON public.inspirations(author_id);
 CREATE INDEX IF NOT EXISTS idx_inspirations_created_at ON public.inspirations(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_inspirations_status_created ON public.inspirations(status, created_at DESC);
 
 -- 8. SAVED INSPIRATIONS (BOOKMARKS) TABLE
 CREATE TABLE IF NOT EXISTS public.saved_inspirations (
@@ -169,6 +171,31 @@ CREATE TABLE IF NOT EXISTS public.saved_inspirations (
 );
 
 CREATE INDEX IF NOT EXISTS idx_saved_user ON public.saved_inspirations(user_id);
+CREATE INDEX IF NOT EXISTS idx_saved_inspiration ON public.saved_inspirations(inspiration_id);
+
+-- Trigger to automatically update saves_count on inspirations
+CREATE OR REPLACE FUNCTION public.handle_saved_inspiration_count()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        UPDATE public.inspirations
+        SET saves_count = saves_count + 1
+        WHERE id = NEW.inspiration_id;
+        RETURN NEW;
+    ELSIF TG_OP = 'DELETE' THEN
+        UPDATE public.inspirations
+        SET saves_count = GREATEST(0, saves_count - 1)
+        WHERE id = OLD.inspiration_id;
+        RETURN OLD;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trg_saved_inspiration_count ON public.saved_inspirations;
+CREATE TRIGGER trg_saved_inspiration_count
+    AFTER INSERT OR DELETE ON public.saved_inspirations
+    FOR EACH ROW EXECUTE FUNCTION public.handle_saved_inspiration_count();
 
 -- 9. ROW LEVEL SECURITY (RLS) POLICIES
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -272,10 +299,41 @@ CREATE POLICY "Users can unsave inspirations"
     USING (auth.uid() = user_id);
 
 -- 10. STORAGE BUCKETS CONFIGURATION (Documented for Supabase Storage)
--- Run via Supabase SQL Editor if storage schema is accessible:
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('inspirations', 'inspirations', true),
        ('avatars', 'avatars', true),
        ('room-previews', 'room-previews', true)
 ON CONFLICT (id) DO NOTHING;
+
+-- STORAGE POLICIES
+DO $$ BEGIN
+    CREATE POLICY "Public Read Access for Akalin Buckets"
+        ON storage.objects FOR SELECT
+        USING (bucket_id IN ('inspirations', 'avatars', 'room-previews'));
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Authenticated Upload for Akalin Buckets"
+        ON storage.objects FOR INSERT
+        WITH CHECK (
+            bucket_id IN ('inspirations', 'avatars', 'room-previews')
+            AND auth.role() = 'authenticated'
+        );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Users can update and delete their own uploads"
+        ON storage.objects FOR ALL
+        USING (
+            bucket_id IN ('inspirations', 'avatars', 'room-previews')
+            AND auth.uid()::text = (storage.foldername(name))[1]
+        );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
 

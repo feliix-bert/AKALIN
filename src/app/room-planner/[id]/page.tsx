@@ -70,7 +70,7 @@ export default function RoomPlannerEditPage() {
         <h2 className="text-xl font-bold text-stone-800 dark:text-stone-200">{error}</h2>
         <Link
           href="/my-designs"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 text-white text-xs font-medium hover:bg-stone-800"
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#009B75] text-white text-xs font-bold hover:bg-[#007F60] shadow-sm transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Kembali ke Desain Saya</span>

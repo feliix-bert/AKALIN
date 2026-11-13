@@ -183,8 +183,23 @@ export const DataService = {
   async createInspiration(
     inspiration: Omit<Inspiration, "id" | "likes_count" | "saves_count" | "created_at" | "updated_at">
   ): Promise<Inspiration> {
+    // Auto-resolve author_id from Supabase session if not set or placeholder
+    let resolvedAuthorId = inspiration.author_id;
+    if (isSupabaseConfigured() && (!resolvedAuthorId || resolvedAuthorId === "user-current")) {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) resolvedAuthorId = user.id;
+      } catch {
+        // keep as-is
+      }
+    }
+
     const newInspiration: Inspiration = {
       ...inspiration,
+      author_id: resolvedAuthorId,
       id: "ins-" + Date.now(),
       likes_count: 0,
       saves_count: 0,
@@ -241,30 +256,54 @@ export const DataService = {
 
   // SAVED INSPIRATIONS (BOOKMARKS)
   async getSavedInspirationIds(): Promise<string[]> {
+    // Try Supabase first (logged-in user)
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          const { data, error } = await supabase
+            .from("saved_inspirations")
+            .select("inspiration_id")
+            .eq("user_id", user.id);
+          if (!error && data) {
+            const ids = data.map((r: { inspiration_id: string }) => r.inspiration_id);
+            // Also sync to localStorage as cache
+            if (typeof window !== "undefined") {
+              localStorage.setItem(LOCAL_STORAGE_KEY_SAVED, JSON.stringify(ids));
+            }
+            return ids;
+          }
+        }
+      } catch (err) {
+        console.warn("Supabase getSavedInspirationIds error:", err);
+      }
+    }
+
+    // Fallback: localStorage
     if (typeof window === "undefined") return [];
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY_SAVED);
-      return saved ? JSON.parse(saved) : ["ins-001", "ins-002"];
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return ["ins-001", "ins-002"];
+      return [];
     }
   },
 
   async toggleSaveInspiration(id: string): Promise<boolean> {
-    if (typeof window === "undefined") return false;
+    // Determine current state
     const saved = await this.getSavedInspirationIds();
-    let isSavedNow = false;
-    let nextSaved: string[] = [];
+    const isSavedNow = !saved.includes(id);
+    const nextSaved = isSavedNow
+      ? [...saved, id]
+      : saved.filter((item) => item !== id);
 
-    if (saved.includes(id)) {
-      nextSaved = saved.filter((item) => item !== id);
-      isSavedNow = false;
-    } else {
-      nextSaved = [...saved, id];
-      isSavedNow = true;
+    // Always update localStorage cache
+    if (typeof window !== "undefined") {
+      localStorage.setItem(LOCAL_STORAGE_KEY_SAVED, JSON.stringify(nextSaved));
     }
-
-    localStorage.setItem(LOCAL_STORAGE_KEY_SAVED, JSON.stringify(nextSaved));
 
     if (isSupabaseConfigured()) {
       try {
@@ -274,7 +313,9 @@ export const DataService = {
         } = await supabase.auth.getUser();
         if (user) {
           if (isSavedNow) {
-            await supabase.from("saved_inspirations").insert({ user_id: user.id, inspiration_id: id });
+            await supabase
+              .from("saved_inspirations")
+              .insert({ user_id: user.id, inspiration_id: id });
           } else {
             await supabase
               .from("saved_inspirations")
@@ -296,10 +337,23 @@ export const DataService = {
     if (isSupabaseConfigured()) {
       try {
         const supabase = createClient();
-        const { data, error } = await supabase
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        let query = supabase
           .from("room_designs")
           .select("*")
           .order("updated_at", { ascending: false });
+
+        // If logged in, fetch user's own designs + public designs
+        if (user) {
+          query = query.or(`owner_id.eq.${user.id},visibility.eq.public`);
+        } else {
+          query = query.eq("visibility", "public");
+        }
+
+        const { data, error } = await query;
         if (!error && data && data.length > 0) return data;
       } catch (err) {
         console.warn("Supabase getRoomDesigns error:", err);
@@ -393,8 +447,24 @@ export const DataService = {
 
   async saveRoomDesign(design: Omit<RoomDesign, "id" | "created_at" | "updated_at"> & { id?: string }): Promise<RoomDesign> {
     const isNew = !design.id;
+
+    // Auto-resolve owner_id from real Supabase session
+    let resolvedOwnerId = design.owner_id;
+    if (isSupabaseConfigured() && (!resolvedOwnerId || resolvedOwnerId === "current-user")) {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) resolvedOwnerId = user.id;
+      } catch {
+        // keep as-is if fetch fails
+      }
+    }
+
     const finalDesign: RoomDesign = {
       ...design,
+      owner_id: resolvedOwnerId,
       id: design.id || "design-" + Date.now(),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

@@ -1,14 +1,74 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import * as THREE from "three";
 import { ThreeEvent, useThree } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
 import { PlacedFurniture } from "@/types";
 import { useRoomStore } from "@/stores/useRoomStore";
 import { ProceduralFurniture } from "./procedural-furniture";
 
 interface PlacedFurnitureMeshProps {
   item: PlacedFurniture;
+}
+
+// ── GLB sub-component ──────────────────────────────────────────────────────
+function GlbFurnitureMesh({
+  url,
+  dimensions,
+}: {
+  url: string;
+  dimensions: [number, number, number];
+}) {
+  const { scene } = useGLTF(url);
+  const cloned = useMemo(() => scene.clone(true), [scene]);
+
+  useEffect(() => {
+    // Auto-scale the loaded mesh to fit declared dimensions
+    const box = new THREE.Box3().setFromObject(cloned);
+    const size = box.getSize(new THREE.Vector3());
+    if (size.x > 0 && size.y > 0 && size.z > 0) {
+      const scaleX = dimensions[0] / size.x;
+      const scaleY = dimensions[1] / size.y;
+      const scaleZ = dimensions[2] / size.z;
+      const uniform = Math.min(scaleX, scaleY, scaleZ);
+      cloned.scale.set(uniform, uniform, uniform);
+    }
+    // Center the mesh on the origin, bottom at Y=0
+    const newBox = new THREE.Box3().setFromObject(cloned);
+    const center = newBox.getCenter(new THREE.Vector3());
+    const minY = newBox.min.y;
+    cloned.position.set(-center.x, -minY, -center.z);
+  }, [cloned, dimensions]);
+
+  useEffect(() => {
+    // Cleanup on unmount
+    return () => {
+      cloned.traverse((obj) => {
+        if ((obj as THREE.Mesh).isMesh) {
+          const mesh = obj as THREE.Mesh;
+          mesh.geometry?.dispose();
+          if (Array.isArray(mesh.material)) {
+            mesh.material.forEach((m) => m.dispose());
+          } else {
+            (mesh.material as THREE.Material)?.dispose();
+          }
+        }
+      });
+    };
+  }, [cloned]);
+
+  return <primitive object={cloned} castShadow receiveShadow />;
+}
+
+// Fallback box shown while GLB loads
+function GlbLoadingFallback({ dimensions }: { dimensions: [number, number, number] }) {
+  return (
+    <mesh>
+      <boxGeometry args={dimensions} />
+      <meshStandardMaterial color="#A7AE91" roughness={0.8} wireframe />
+    </mesh>
+  );
 }
 
 export const PlacedFurnitureMesh: React.FC<PlacedFurnitureMeshProps> = ({ item }) => {
@@ -76,14 +136,20 @@ export const PlacedFurnitureMesh: React.FC<PlacedFurnitureMeshProps> = ({ item }
       }}
       onPointerOut={() => setIsHovered(false)}
     >
-      {/* 3D Visual Mesh */}
-      <ProceduralFurniture
-        category={item.category}
-        dimensions={item.dimensions}
-        color={item.color}
-        isColliding={isColliding}
-        isSelected={isSelected}
-      />
+      {/* 3D Visual Mesh — GLB or Procedural */}
+      {item.model_url ? (
+        <Suspense fallback={<GlbLoadingFallback dimensions={item.dimensions} />}>
+          <GlbFurnitureMesh url={item.model_url} dimensions={item.dimensions} />
+        </Suspense>
+      ) : (
+        <ProceduralFurniture
+          category={item.category}
+          dimensions={item.dimensions}
+          color={item.color}
+          isColliding={isColliding}
+          isSelected={isSelected}
+        />
+      )}
 
       {/* Selection Bounding Highlight */}
       {isSelected && (

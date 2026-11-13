@@ -1,14 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/ui/logo";
-import { Lock, Mail, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { Lock, Mail, Loader2 } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") ?? "/explore";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,58 +30,45 @@ export default function LoginPage() {
       });
 
       if (authError) {
-        // If placeholder or mock env, provide friendly offline/demo login
-        if (
-          process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("placeholder") ||
-          authError.message.includes("fetch")
-        ) {
-          localStorage.setItem("akalin_demo_user", JSON.stringify({ email, role: "user" }));
-          router.push("/explore");
-          return;
+        // Map Supabase errors to Indonesian
+        const msg = authError.message;
+        if (msg.includes("Invalid login credentials") || msg.includes("invalid_credentials")) {
+          setError("Email atau kata sandi salah. Silakan periksa kembali.");
+        } else if (msg.includes("Email not confirmed")) {
+          setError("Email belum dikonfirmasi. Periksa inbox atau folder spam-mu.");
+        } else if (msg.includes("Too many requests")) {
+          setError("Terlalu banyak percobaan. Tunggu beberapa menit lalu coba lagi.");
+        } else {
+          setError(msg);
         }
-        setError(authError.message);
-      } else {
-        router.push("/explore");
+        return;
       }
-    } catch (err: any) {
-      // Local fallback
-      localStorage.setItem("akalin_demo_user", JSON.stringify({ email, role: "user" }));
-      router.push("/explore");
+
+      router.push(redirectTo);
+      router.refresh();
+    } catch (err: unknown) {
+      setError("Terjadi kesalahan koneksi. Silakan coba kembali.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDemoLogin = (role: "user" | "admin") => {
-    localStorage.setItem(
-      "akalin_demo_user",
-      JSON.stringify({
-        email: role === "admin" ? "admin@akalin.id" : "anak_kos@akalin.id",
-        role,
-      })
-    );
-    if (role === "admin") {
-      router.push("/admin");
-    } else {
-      router.push("/explore");
-    }
-  };
-
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md p-8 rounded-3xl bg-white dark:bg-[#1E2126] border border-stone-200/80 dark:border-stone-800 shadow-elevated space-y-6">
+    <div className="min-h-[85vh] bg-[#FAF8F5] dark:bg-[#121316] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md p-8 sm:p-10 rounded-3xl bg-white dark:bg-stone-900 border border-[#25251F]/15 dark:border-stone-800 shadow-xl space-y-6">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center space-y-2">
           <Link href="/">
             <Logo size="lg" />
           </Link>
-          <p className="text-xs text-stone-500 pt-1">
+          <p className="text-xs text-[#5E5E52] pt-1">
             Akses desain 3D kamarmu dan simpan ide penataan favorit.
           </p>
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs">
+          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
             {error}
           </div>
         )}
@@ -86,35 +76,35 @@ export default function LoginPage() {
         {/* Form */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="text-xs font-semibold text-stone-700 dark:text-stone-300 block mb-1">
+            <label className="text-xs font-bold text-[#25251F] dark:text-stone-300 block mb-1.5">
               Email
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
+              <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#5E5E52]" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="nama@kampus.ac.id"
-                className="w-full pl-10 pr-4 py-2.5 text-xs bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 rounded-xl focus:ring-2 focus:ring-emerald-600/30 focus:outline-none"
+                className="w-full pl-11 pr-4 py-3 text-xs bg-[#FAF8F5] dark:bg-stone-800 border border-[#25251F]/15 dark:border-stone-700 rounded-2xl focus:ring-2 focus:ring-[#009B75]/30 focus:outline-none text-[#25251F] dark:text-white"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-stone-700 dark:text-stone-300 block mb-1">
+            <label className="text-xs font-bold text-[#25251F] dark:text-stone-300 block mb-1.5">
               Kata Sandi
             </label>
             <div className="relative">
-              <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
+              <Lock className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#5E5E52]" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2.5 text-xs bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 rounded-xl focus:ring-2 focus:ring-emerald-600/30 focus:outline-none"
+                className="w-full pl-11 pr-4 py-3 text-xs bg-[#FAF8F5] dark:bg-stone-800 border border-[#25251F]/15 dark:border-stone-700 rounded-2xl focus:ring-2 focus:ring-[#009B75]/30 focus:outline-none text-[#25251F] dark:text-white"
               />
             </div>
           </div>
@@ -122,38 +112,15 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-2xl bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-bold hover:bg-stone-800 flex items-center justify-center gap-2 transition-all shadow-sm"
+            className="w-full py-3.5 rounded-full bg-[#009B75] hover:bg-[#006B52] text-white text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:opacity-50"
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Masuk</span>}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Masuk ke Akalin</span>}
           </button>
         </form>
 
-        {/* Demo Fast Login Buttons */}
-        <div className="pt-2 border-t border-stone-100 dark:border-stone-800 space-y-2">
-          <span className="text-[10px] text-stone-400 text-center block uppercase tracking-wider font-semibold">
-            Atau Coba Instan (Demo Mode)
-          </span>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => handleDemoLogin("user")}
-              className="py-2 px-3 rounded-xl border border-stone-200 hover:bg-stone-50 text-[11px] font-medium text-stone-700 dark:text-stone-300"
-            >
-              Akun Mahasiswa
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDemoLogin("admin")}
-              className="py-2 px-3 rounded-xl border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-100 text-[11px] font-medium text-emerald-800 dark:text-emerald-300"
-            >
-              Akun Admin
-            </button>
-          </div>
-        </div>
-
-        <p className="text-center text-xs text-stone-500">
+        <p className="text-center text-xs text-[#5E5E52]">
           Belum punya akun?{" "}
-          <Link href="/register" className="font-semibold text-emerald-700 hover:underline">
+          <Link href="/register" className="font-bold text-[#009B75] hover:underline">
             Daftar Sekarang
           </Link>
         </p>
@@ -162,3 +129,10 @@ export default function LoginPage() {
   );
 }
 
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}

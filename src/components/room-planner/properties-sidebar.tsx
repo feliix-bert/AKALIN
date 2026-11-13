@@ -77,18 +77,18 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
         // ================= SELECTED ITEM CONTROLS =================
         <div className="flex-1 flex flex-col overflow-y-auto">
           {/* Header */}
-          <div className="p-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
+          <div className="p-4 border-b border-stone-200/80 dark:border-stone-800 flex items-center justify-between">
             <div className="min-w-0">
-              <span className="text-[10px] font-semibold tracking-wider text-emerald-600 dark:text-emerald-400 uppercase">
+              <span className="text-[10px] font-bold tracking-wider text-[#009B75] uppercase">
                 Perabotan Terpilih
               </span>
-              <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm truncate">
+              <h3 className="font-bold text-[#25251F] dark:text-stone-100 text-sm truncate">
                 {selectedItem.name}
               </h3>
             </div>
             <button
               onClick={() => selectItem(null)}
-              className="p-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 hover:text-stone-600"
+              className="p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 hover:text-[#25251F]"
               title="Batalkan Pilihan"
             >
               <X className="w-4 h-4" />
@@ -98,11 +98,11 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
           <div className="p-4 space-y-4 flex-1">
             {/* Collision Warning */}
             {isColliding && (
-              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/50 flex items-start gap-2.5 text-xs text-red-700 dark:text-red-400">
-                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
+              <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/50 flex items-start gap-2.5 text-xs text-rose-800 dark:text-rose-300">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
                 <div>
-                  <p className="font-medium">Posisi Bertabrakan</p>
-                  <p className="text-[11px] text-red-600/80 mt-0.5">
+                  <p className="font-bold">Posisi Bertabrakan</p>
+                  <p className="text-[11px] text-rose-700 dark:text-rose-400 mt-0.5">
                     Objek ini menumpuk dengan perabotan lain. Geser ke area lantai yang kosong.
                   </p>
                 </div>
@@ -111,37 +111,37 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
 
             {/* Quick Action Buttons */}
             <div>
-              <label className="text-[11px] font-medium text-stone-500 mb-2 block">
+              <label className="text-xs font-bold text-stone-700 dark:text-stone-300 mb-2 block">
                 Aksi Cepat
               </label>
               <div className="grid grid-cols-4 gap-2">
                 <button
                   onClick={() => rotateSelectedItem(-Math.PI / 2)}
-                  className="p-2.5 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 flex flex-col items-center gap-1 text-[11px] text-stone-700 dark:text-stone-300"
+                  className="p-2.5 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 flex flex-col items-center gap-1 text-[11px] font-semibold text-[#25251F] dark:text-stone-200"
                   title="Putar -90°"
                 >
-                  <RotateCcw className="w-4 h-4" />
+                  <RotateCcw className="w-4 h-4 text-stone-600 dark:text-stone-400" />
                   <span>-90°</span>
                 </button>
                 <button
                   onClick={() => rotateSelectedItem(Math.PI / 2)}
-                  className="p-2.5 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 flex flex-col items-center gap-1 text-[11px] text-stone-700 dark:text-stone-300"
+                  className="p-2.5 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 flex flex-col items-center gap-1 text-[11px] font-semibold text-[#25251F] dark:text-stone-200"
                   title="Putar +90°"
                 >
-                  <RotateCw className="w-4 h-4" />
+                  <RotateCw className="w-4 h-4 text-stone-600 dark:text-stone-400" />
                   <span>+90°</span>
                 </button>
                 <button
                   onClick={duplicateSelectedItem}
-                  className="p-2.5 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 flex flex-col items-center gap-1 text-[11px] text-stone-700 dark:text-stone-300"
+                  className="p-2.5 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 flex flex-col items-center gap-1 text-[11px] font-semibold text-[#25251F] dark:text-stone-200"
                   title="Duplikat"
                 >
-                  <Copy className="w-4 h-4" />
+                  <Copy className="w-4 h-4 text-stone-600 dark:text-stone-400" />
                   <span>Duplikat</span>
                 </button>
                 <button
                   onClick={deleteSelectedItem}
-                  className="p-2.5 rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-900/40 flex flex-col items-center gap-1 text-[11px] text-red-600 dark:text-red-400"
+                  className="p-2.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/20 hover:bg-rose-100 dark:hover:bg-rose-900/40 flex flex-col items-center gap-1 text-[11px] font-bold text-rose-700 dark:text-rose-400"
                   title="Hapus"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -152,11 +152,11 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
 
             {/* Rotation Slider */}
             <div>
-              <div className="flex items-center justify-between text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">
+              <div className="flex items-center justify-between text-xs font-bold text-[#25251F] dark:text-stone-200 mb-2">
                 <span className="flex items-center gap-1.5">
-                  <Compass className="w-3.5 h-3.5 text-stone-400" /> Rotasi
+                  <Compass className="w-3.5 h-3.5 text-stone-400" /> Rotasi Bebas
                 </span>
-                <span className="font-mono text-stone-500">{currentRotDeg}°</span>
+                <span className="font-mono text-[#009B75]">{currentRotDeg}°</span>
               </div>
               <input
                 type="range"
@@ -168,18 +168,18 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
                   const rad = (parseInt(e.target.value, 10) * Math.PI) / 180;
                   updateItemRotation(selectedItem.instanceId, rad);
                 }}
-                className="w-full accent-emerald-600 cursor-pointer"
+                className="w-full accent-[#009B75] cursor-pointer"
               />
             </div>
 
             {/* Position Coordinates */}
             <div>
-              <label className="text-[11px] font-medium text-stone-500 mb-2 block">
+              <label className="text-xs font-bold text-stone-700 dark:text-stone-300 mb-2 block">
                 Koordinat Posisi (meter)
               </label>
               <div className="grid grid-cols-2 gap-2">
-                <div className="p-2 rounded-xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800">
-                  <span className="text-[10px] text-stone-400 font-mono block">Sumbu X (Lebar)</span>
+                <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800">
+                  <span className="text-[10px] text-stone-500 font-mono block">Sumbu X (Lebar)</span>
                   <div className="flex items-center gap-1 mt-1">
                     <input
                       type="number"
@@ -193,14 +193,14 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
                           selectedItem.position[2],
                         ]);
                       }}
-                      className="w-full text-xs font-mono bg-transparent focus:outline-none text-stone-800 dark:text-stone-200"
+                      className="w-full text-xs font-mono font-bold bg-transparent focus:outline-none text-[#25251F] dark:text-stone-100"
                     />
-                    <span className="text-[10px] text-stone-400">m</span>
+                    <span className="text-[10px] text-stone-500 font-medium">m</span>
                   </div>
                 </div>
 
-                <div className="p-2 rounded-xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800">
-                  <span className="text-[10px] text-stone-400 font-mono block">Sumbu Z (Panjang)</span>
+                <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800">
+                  <span className="text-[10px] text-stone-500 font-mono block">Sumbu Z (Panjang)</span>
                   <div className="flex items-center gap-1 mt-1">
                     <input
                       type="number"
@@ -214,34 +214,34 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
                           val,
                         ]);
                       }}
-                      className="w-full text-xs font-mono bg-transparent focus:outline-none text-stone-800 dark:text-stone-200"
+                      className="w-full text-xs font-mono font-bold bg-transparent focus:outline-none text-[#25251F] dark:text-stone-100"
                     />
-                    <span className="text-[10px] text-stone-400">m</span>
+                    <span className="text-[10px] text-stone-500 font-medium">m</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Dimensions Info */}
-            <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-900/40 border border-stone-200/60 dark:border-stone-800 space-y-1.5">
-              <span className="text-[11px] font-semibold text-stone-700 dark:text-stone-300 block">
-                Dimensi Fisik
+            <div className="p-3.5 rounded-2xl bg-[#FAF8F5] dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 space-y-2">
+              <span className="text-xs font-bold text-[#25251F] dark:text-stone-200 block">
+                Dimensi Fisik Item
               </span>
-              <div className="flex justify-between text-xs text-stone-500">
+              <div className="flex justify-between text-xs text-stone-600 dark:text-stone-400">
                 <span>Lebar (W):</span>
-                <span className="font-mono text-stone-800 dark:text-stone-200">
+                <span className="font-mono font-bold text-[#25251F] dark:text-stone-100">
                   {selectedItem.dimensions[0]} meter
                 </span>
               </div>
-              <div className="flex justify-between text-xs text-stone-500">
+              <div className="flex justify-between text-xs text-stone-600 dark:text-stone-400">
                 <span>Panjang (D):</span>
-                <span className="font-mono text-stone-800 dark:text-stone-200">
+                <span className="font-mono font-bold text-[#25251F] dark:text-stone-100">
                   {selectedItem.dimensions[2]} meter
                 </span>
               </div>
-              <div className="flex justify-between text-xs text-stone-500">
+              <div className="flex justify-between text-xs text-stone-600 dark:text-stone-400">
                 <span>Tinggi (H):</span>
-                <span className="font-mono text-stone-800 dark:text-stone-200">
+                <span className="font-mono font-bold text-[#25251F] dark:text-stone-100">
                   {selectedItem.dimensions[1]} meter
                 </span>
               </div>
@@ -252,13 +252,13 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
         // ================= ROOM SETTINGS =================
         <div className="flex-1 flex flex-col overflow-y-auto">
           {/* Header */}
-          <div className="p-4 border-b border-stone-100 dark:border-stone-800">
+          <div className="p-4 border-b border-stone-200/80 dark:border-stone-800">
             <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300">
+              <span className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-[#009B75]">
                 <Sliders className="w-4 h-4" />
               </span>
               <div>
-                <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                <h3 className="font-bold text-[#25251F] dark:text-stone-100 text-sm">
                   Pengaturan Ruangan
                 </h3>
                 <p className="text-[11px] text-stone-500">
@@ -271,12 +271,12 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
           <div className="p-4 space-y-5 flex-1">
             {/* Room Dimensions Inputs */}
             <div>
-              <label className="text-xs font-semibold text-stone-800 dark:text-stone-200 mb-2 flex items-center gap-1.5">
-                <Maximize className="w-3.5 h-3.5 text-stone-400" /> Ukuran Ruangan (meter)
+              <label className="text-xs font-bold text-[#25251F] dark:text-stone-200 mb-2 flex items-center gap-1.5">
+                <Maximize className="w-3.5 h-3.5 text-[#009B75]" /> Ukuran Ruangan (meter)
               </label>
               <div className="grid grid-cols-3 gap-2">
-                <div className="p-2 rounded-xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800">
-                  <span className="text-[10px] text-stone-400 block font-mono">Panjang</span>
+                <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800">
+                  <span className="text-[10px] text-stone-500 block font-mono">Panjang</span>
                   <input
                     type="number"
                     min="1.5"
@@ -286,11 +286,11 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
                     onChange={(e) =>
                       setDimensions(parseFloat(e.target.value) || 3.0, roomWidth, wallHeight)
                     }
-                    className="w-full text-xs font-mono font-medium bg-transparent focus:outline-none mt-1 text-stone-900 dark:text-stone-100"
+                    className="w-full text-xs font-mono font-bold bg-transparent focus:outline-none mt-1 text-[#25251F] dark:text-stone-100"
                   />
                 </div>
-                <div className="p-2 rounded-xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800">
-                  <span className="text-[10px] text-stone-400 block font-mono">Lebar</span>
+                <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800">
+                  <span className="text-[10px] text-stone-500 block font-mono">Lebar</span>
                   <input
                     type="number"
                     min="1.5"
@@ -300,11 +300,11 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
                     onChange={(e) =>
                       setDimensions(roomLength, parseFloat(e.target.value) || 3.0, wallHeight)
                     }
-                    className="w-full text-xs font-mono font-medium bg-transparent focus:outline-none mt-1 text-stone-900 dark:text-stone-100"
+                    className="w-full text-xs font-mono font-bold bg-transparent focus:outline-none mt-1 text-[#25251F] dark:text-stone-100"
                   />
                 </div>
-                <div className="p-2 rounded-xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800">
-                  <span className="text-[10px] text-stone-400 block font-mono">Tinggi</span>
+                <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800">
+                  <span className="text-[10px] text-stone-500 block font-mono">Tinggi</span>
                   <input
                     type="number"
                     min="2.0"
@@ -314,7 +314,7 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
                     onChange={(e) =>
                       setDimensions(roomLength, roomWidth, parseFloat(e.target.value) || 2.8)
                     }
-                    className="w-full text-xs font-mono font-medium bg-transparent focus:outline-none mt-1 text-stone-900 dark:text-stone-100"
+                    className="w-full text-xs font-mono font-bold bg-transparent focus:outline-none mt-1 text-[#25251F] dark:text-stone-100"
                   />
                 </div>
               </div>
@@ -322,8 +322,8 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
 
             {/* Floor Material & Color */}
             <div>
-              <label className="text-xs font-semibold text-stone-800 dark:text-stone-200 mb-2 flex items-center gap-1.5">
-                <Palette className="w-3.5 h-3.5 text-stone-400" /> Material Lantai
+              <label className="text-xs font-bold text-[#25251F] dark:text-stone-200 mb-2 flex items-center gap-1.5">
+                <Palette className="w-3.5 h-3.5 text-[#009B75]" /> Material Lantai
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {FLOOR_TEXTURES.map((t) => (
@@ -333,17 +333,17 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
                       setFloorTexture(t.id);
                       setFloorColor(t.color);
                     }}
-                    className={`p-2 rounded-xl border text-left flex items-center gap-2 transition-all ${
+                    className={`p-2.5 rounded-xl border text-left flex items-center gap-2.5 transition-all ${
                       floorTexture === t.id
-                        ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300"
-                        : "border-stone-200 dark:border-stone-700 hover:bg-stone-50 text-stone-700 dark:text-stone-300"
+                        ? "border-[#009B75] bg-emerald-50/60 dark:bg-emerald-950/20 text-[#009B75] font-bold"
+                        : "border-stone-200 dark:border-stone-700 hover:bg-stone-50 text-stone-700 dark:text-stone-300 font-medium"
                     }`}
                   >
                     <span
                       className="w-4 h-4 rounded-md border border-black/10 shrink-0"
                       style={{ backgroundColor: t.color }}
                     />
-                    <span className="text-xs font-medium truncate">{t.label}</span>
+                    <span className="text-xs truncate">{t.label}</span>
                   </button>
                 ))}
               </div>
@@ -351,17 +351,17 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
 
             {/* Wall Color */}
             <div>
-              <label className="text-xs font-semibold text-stone-800 dark:text-stone-200 mb-2 block">
+              <label className="text-xs font-bold text-[#25251F] dark:text-stone-200 mb-2 block">
                 Warna Dinding
               </label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 {WALL_COLORS.map((w) => (
                   <button
                     key={w.color}
                     onClick={() => setWallColor(w.color)}
                     className={`w-8 h-8 rounded-full border-2 transition-transform ${
                       wallColor === w.color
-                        ? "border-emerald-600 scale-110 shadow-sm"
+                        ? "border-[#009B75] scale-110 shadow-sm ring-2 ring-[#009B75]/30"
                         : "border-stone-300 dark:border-stone-600 hover:scale-105"
                     }`}
                     style={{ backgroundColor: w.color }}
@@ -373,8 +373,8 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
 
             {/* Lighting Mood */}
             <div>
-              <label className="text-xs font-semibold text-stone-800 dark:text-stone-200 mb-2 flex items-center gap-1.5">
-                <Sun className="w-3.5 h-3.5 text-stone-400" /> Suasana Cahaya
+              <label className="text-xs font-bold text-[#25251F] dark:text-stone-200 mb-2 flex items-center gap-1.5">
+                <Sun className="w-3.5 h-3.5 text-[#009B75]" /> Suasana Cahaya
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -385,9 +385,9 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
                   <button
                     key={l.id}
                     onClick={() => setLightingPreset(l.id as any)}
-                    className={`py-2 px-1 text-center rounded-xl border text-[11px] font-medium transition-all ${
+                    className={`py-2 px-1 text-center rounded-xl border text-[11px] font-bold transition-all ${
                       lighting.preset === l.id
-                        ? "border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300"
+                        ? "border-[#009B75] bg-emerald-50 dark:bg-emerald-950/40 text-[#009B75]"
                         : "border-stone-200 dark:border-stone-700 hover:bg-stone-50 text-stone-600 dark:text-stone-400"
                     }`}
                   >
@@ -398,7 +398,7 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
             </div>
 
             {/* Clear Scene Action */}
-            <div className="pt-2 border-t border-stone-100 dark:border-stone-800">
+            <div className="pt-2 border-t border-stone-200 dark:border-stone-800">
               <button
                 onClick={() => {
                   if (confirm("Kosongkan semua perabotan dari ruangan ini?")) {
@@ -406,7 +406,7 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
                   }
                 }}
                 disabled={items.length === 0}
-                className="w-full py-2 px-3 text-xs text-stone-500 hover:text-red-600 border border-stone-200 dark:border-stone-800 hover:border-red-200 rounded-xl transition-colors disabled:opacity-40"
+                className="w-full py-2.5 px-3 text-xs font-semibold text-stone-600 hover:text-rose-600 border border-stone-200 dark:border-stone-800 hover:border-rose-200 rounded-xl transition-colors disabled:opacity-40"
               >
                 Kosongkan Ruangan ({items.length} objek)
               </button>
@@ -417,4 +417,3 @@ export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ onCloseMob
     </aside>
   );
 };
-
