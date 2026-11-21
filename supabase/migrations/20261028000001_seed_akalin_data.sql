@@ -29,12 +29,16 @@ BEGIN
             confirmation_token,
             recovery_token
         ) VALUES 
-        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'aditya@akalin.id', '$2a$10$abcdefghijklmnopqrstuvwxyz01234567890123456789012345', now(), '{"provider":"email","providers":["email"]}', '{"name":"Aditya Pratama"}', now(), now(), '', ''),
-        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', 'clarissa@akalin.id', '$2a$10$abcdefghijklmnopqrstuvwxyz01234567890123456789012345', now(), '{"provider":"email","providers":["email"]}', '{"name":"Clarissa Dewi"}', now(), now(), '', ''),
-        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', 'farhan@akalin.id', '$2a$10$abcdefghijklmnopqrstuvwxyz01234567890123456789012345', now(), '{"provider":"email","providers":["email"]}', '{"name":"Farhan Hakim"}', now(), now(), '', ''),
-        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000004', 'authenticated', 'authenticated', 'nabila@akalin.id', '$2a$10$abcdefghijklmnopqrstuvwxyz01234567890123456789012345', now(), '{"provider":"email","providers":["email"]}', '{"name":"Nabila Putri"}', now(), now(), '', ''),
-        ('00000000-0000-0000-0000-000000000000', 'a0000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'admin@akalin.id', '$2a$10$abcdefghijklmnopqrstuvwxyz01234567890123456789012345', now(), '{"provider":"email","providers":["email"]}', '{"name":"Admin Akalin"}', now(), now(), '', '')
-        ON CONFLICT (id) DO NOTHING;
+        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'aditya@akalin.id', crypt('123456', gen_salt('bf', 10)), now(), '{"provider":"email","providers":["email"]}', '{"name":"Aditya Pratama","role":"user"}', now(), now(), '', ''),
+        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', 'clarissa@akalin.id', crypt('123456', gen_salt('bf', 10)), now(), '{"provider":"email","providers":["email"]}', '{"name":"Clarissa Dewi","role":"user"}', now(), now(), '', ''),
+        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', 'farhan@akalin.id', crypt('123456', gen_salt('bf', 10)), now(), '{"provider":"email","providers":["email"]}', '{"name":"Farhan Hakim","role":"user"}', now(), now(), '', ''),
+        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000004', 'authenticated', 'authenticated', 'nabila@akalin.id', crypt('123456', gen_salt('bf', 10)), now(), '{"provider":"email","providers":["email"]}', '{"name":"Nabila Putri","role":"user"}', now(), now(), '', ''),
+        ('00000000-0000-0000-0000-000000000000', 'a0000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'admin@gmail.com', crypt('123456', gen_salt('bf', 10)), now(), '{"provider":"email","providers":["email"]}', '{"name":"Admin Akalin","role":"admin"}', now(), now(), '', '')
+        ON CONFLICT (id) DO UPDATE SET
+            email = EXCLUDED.email,
+            encrypted_password = EXCLUDED.encrypted_password,
+            raw_user_meta_data = EXCLUDED.raw_user_meta_data,
+            updated_at = now();
     END IF;
 EXCEPTION
     WHEN OTHERS THEN

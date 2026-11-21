@@ -118,7 +118,7 @@ Untuk memberikan peran admin pada pengguna pertama, jalankan query berikut di Su
 ```sql
 UPDATE public.profiles
 SET role = 'admin'
-WHERE id = (SELECT id FROM auth.users WHERE email = 'admin@akalin.id');
+WHERE id = (SELECT id FROM auth.users WHERE email = 'admin@gmail.com');
 ```
 *Trigger pencegah eskalasi hak istimewa (`prevent_role_escalation`) melindungi agar pengguna biasa tidak dapat mengubah role mereka sendiri menjadi admin melalui API client.*
 

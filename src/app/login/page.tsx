@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/ui/logo";
-import { Lock, Mail, Loader2 } from "lucide-react";
+import { Lock, Mail, Loader2, Shield } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
@@ -24,7 +24,7 @@ function LoginForm() {
 
     try {
       const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -42,6 +42,21 @@ function LoginForm() {
           setError(msg);
         }
         return;
+      }
+
+      // Check role - if user is admin and default redirect, take them straight to /admin
+      if (authData?.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", authData.user.id)
+          .single();
+
+        if (profile?.role === "admin" && (!searchParams.get("redirect") || redirectTo === "/explore")) {
+          router.push("/admin");
+          router.refresh();
+          return;
+        }
       }
 
       router.push(redirectTo);
@@ -117,6 +132,24 @@ function LoginForm() {
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Masuk ke Akalin</span>}
           </button>
         </form>
+
+        {/* Quick Admin Demo Helper */}
+        <div className="pt-2 border-t border-[#25251F]/10 dark:border-stone-800">
+          <button
+            type="button"
+            onClick={() => {
+              setEmail("admin@gmail.com");
+              setPassword("123456");
+            }}
+            className="w-full py-2.5 px-3.5 rounded-2xl bg-amber-50/80 hover:bg-amber-100/90 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 border border-amber-200/80 dark:border-amber-900/50 text-amber-900 dark:text-amber-200 text-[11px] font-semibold flex items-center justify-between transition-colors cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 text-left">
+              <Shield className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <span>Login Cepat Admin: <code className="font-mono font-bold bg-amber-200/50 dark:bg-amber-900/40 px-1 py-0.5 rounded">admin@gmail.com</code></span>
+            </div>
+            <span className="text-[10px] underline font-bold text-amber-700 dark:text-amber-300 group-hover:text-amber-900 shrink-0">Isi Form</span>
+          </button>
+        </div>
 
         <p className="text-center text-xs text-[#5E5E52]">
           Belum punya akun?{" "}
