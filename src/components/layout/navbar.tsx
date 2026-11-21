@@ -10,6 +10,7 @@ import {
   Compass,
   Box,
   Layers,
+  LayoutGrid,
   Bookmark,
   PlusCircle,
   Menu,
@@ -127,7 +128,7 @@ export const Navbar: React.FC = () => {
     { label: "Jelajah", href: "/explore", icon: Compass },
     { label: "Katalog Perabotan", href: "/furniture", icon: Layers },
     { label: "Planner 3D", href: "/room-planner", icon: Box, highlight: true },
-    { label: "Desain Saya", href: "/my-designs", icon: Bookmark },
+    { label: "Desain Saya", href: "/my-designs", icon: LayoutGrid },
   ];
 
   const initials = profile?.display_name
@@ -276,7 +277,7 @@ export const Navbar: React.FC = () => {
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-xs font-semibold text-[#25251F] dark:text-stone-200 hover:bg-[#F0EEE7] dark:hover:bg-stone-800 transition-colors"
                         >
-                          <Box className="w-4 h-4 text-[#009B75]" />
+                          <LayoutGrid className="w-4 h-4 text-[#009B75]" />
                           <span>Desain Saya</span>
                         </Link>
                         <Link
