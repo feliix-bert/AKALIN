@@ -43,6 +43,25 @@ EXCEPTION
 END $$;
 
 -- 3. SEED PROFILES
+-- Ensure prevent_role_escalation function permits seed/migration updates (auth.uid() IS NULL)
+CREATE OR REPLACE FUNCTION public.prevent_role_escalation()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.role != OLD.role THEN
+        IF auth.uid() IS NOT NULL AND NOT EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE id = auth.uid() AND role = 'admin'
+        ) THEN
+            RAISE EXCEPTION 'Unauthorized: Users cannot modify their own role.';
+        END IF;
+    END IF;
+    NEW.updated_at = timezone('utc'::text, now());
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+ALTER TABLE public.profiles DISABLE TRIGGER trg_prevent_role_escalation;
+
 INSERT INTO public.profiles (id, display_name, avatar_url, role) VALUES
 ('e1000000-0000-0000-0000-000000000001', 'Aditya Pratama', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80', 'user'),
 ('e1000000-0000-0000-0000-000000000002', 'Clarissa Dewi', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=80', 'user'),
@@ -53,6 +72,8 @@ ON CONFLICT (id) DO UPDATE SET
     display_name = EXCLUDED.display_name,
     avatar_url = EXCLUDED.avatar_url,
     role = EXCLUDED.role;
+
+ALTER TABLE public.profiles ENABLE TRIGGER trg_prevent_role_escalation;
 
 -- 4. SEED CATEGORIES (6 Curated Room Concepts)
 INSERT INTO public.categories (id, name, slug, description, icon_name) VALUES

@@ -45,7 +45,8 @@ BEGIN
         COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
         COALESCE(NEW.raw_user_meta_data->>'avatar_url', ''),
         'user'
-    );
+    )
+    ON CONFLICT (id) DO NOTHING;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -61,7 +62,8 @@ RETURNS TRIGGER AS $$
 BEGIN
     IF NEW.role != OLD.role THEN
         -- Only allow if the executing user is already an admin
-        IF NOT EXISTS (
+        -- When auth.uid() IS NULL (database migrations, seeds, SQL editor, service role), allow the role update
+        IF auth.uid() IS NOT NULL AND NOT EXISTS (
             SELECT 1 FROM public.profiles 
             WHERE id = auth.uid() AND role = 'admin'
         ) THEN
