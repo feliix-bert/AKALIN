@@ -8,9 +8,8 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- 2. SEED AUTH USERS (IF NOT ALREADY PRESENT IN SUPABASE AUTH SCHEMA)
--- In Supabase, auth.users holds authentication identities.
--- All UUIDs strictly use valid hexadecimal characters [0-9, a-f].
+-- 2. SEED AUTH USERS & IDENTITIES
+-- In Supabase, auth.users holds authentication identities and auth.identities links auth providers.
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'auth' AND table_name = 'users') THEN
@@ -22,27 +21,100 @@ BEGIN
             email,
             encrypted_password,
             email_confirmed_at,
+            recovery_sent_at,
+            last_sign_in_at,
             raw_app_meta_data,
             raw_user_meta_data,
             created_at,
             updated_at,
             confirmation_token,
-            recovery_token
+            email_change,
+            email_change_token_new,
+            recovery_token,
+            email_change_token_current,
+            phone_change,
+            phone_change_token,
+            reauthentication_token
         ) VALUES 
-        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'aditya@akalin.id', crypt('123456', gen_salt('bf', 10)), now(), '{"provider":"email","providers":["email"]}', '{"name":"Aditya Pratama","role":"user"}', now(), now(), '', ''),
-        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', 'clarissa@akalin.id', crypt('123456', gen_salt('bf', 10)), now(), '{"provider":"email","providers":["email"]}', '{"name":"Clarissa Dewi","role":"user"}', now(), now(), '', ''),
-        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', 'farhan@akalin.id', crypt('123456', gen_salt('bf', 10)), now(), '{"provider":"email","providers":["email"]}', '{"name":"Farhan Hakim","role":"user"}', now(), now(), '', ''),
-        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000004', 'authenticated', 'authenticated', 'nabila@akalin.id', crypt('123456', gen_salt('bf', 10)), now(), '{"provider":"email","providers":["email"]}', '{"name":"Nabila Putri","role":"user"}', now(), now(), '', ''),
-        ('00000000-0000-0000-0000-000000000000', 'a0000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'admin@gmail.com', crypt('123456', gen_salt('bf', 10)), now(), '{"provider":"email","providers":["email"]}', '{"name":"Admin Akalin","role":"admin"}', now(), now(), '', '')
+        ('00000000-0000-0000-0000-000000000000', 'a0000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'admin@gmail.com', crypt('123456', gen_salt('bf', 10)), now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{"name":"Admin Akalin","role":"admin"}'::jsonb, now(), now(), '', '', '', '', '', '', '', ''),
+        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'aditya@akalin.id', crypt('123456', gen_salt('bf', 10)), now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{"name":"Aditya Pratama","role":"user"}'::jsonb, now(), now(), '', '', '', '', '', '', '', ''),
+        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', 'clarissa@akalin.id', crypt('123456', gen_salt('bf', 10)), now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{"name":"Clarissa Dewi","role":"user"}'::jsonb, now(), now(), '', '', '', '', '', '', '', ''),
+        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', 'farhan@akalin.id', crypt('123456', gen_salt('bf', 10)), now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{"name":"Farhan Hakim","role":"user"}'::jsonb, now(), now(), '', '', '', '', '', '', '', ''),
+        ('00000000-0000-0000-0000-000000000000', 'e1000000-0000-0000-0000-000000000004', 'authenticated', 'authenticated', 'nabila@akalin.id', crypt('123456', gen_salt('bf', 10)), now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{"name":"Nabila Putri","role":"user"}'::jsonb, now(), now(), '', '', '', '', '', '', '', '')
         ON CONFLICT (id) DO UPDATE SET
             email = EXCLUDED.email,
             encrypted_password = EXCLUDED.encrypted_password,
+            raw_app_meta_data = EXCLUDED.raw_app_meta_data,
             raw_user_meta_data = EXCLUDED.raw_user_meta_data,
+            confirmation_token = '',
+            email_change = '',
+            email_change_token_new = '',
+            recovery_token = '',
+            email_change_token_current = '',
+            phone_change = '',
+            phone_change_token = '',
+            reauthentication_token = '',
             updated_at = now();
+
+        -- Fix any existing NULL token columns to empty strings (required by GoTrue Auth scanner)
+        UPDATE auth.users
+        SET 
+            confirmation_token = COALESCE(confirmation_token, ''),
+            recovery_token = COALESCE(recovery_token, ''),
+            email_change = COALESCE(email_change, ''),
+            email_change_token_new = COALESCE(email_change_token_new, ''),
+            email_change_token_current = COALESCE(email_change_token_current, ''),
+            phone_change = COALESCE(phone_change, ''),
+            phone_change_token = COALESCE(phone_change_token, ''),
+            reauthentication_token = COALESCE(reauthentication_token, '')
+        WHERE 
+            confirmation_token IS NULL 
+            OR recovery_token IS NULL
+            OR email_change IS NULL 
+            OR email_change_token_new IS NULL;
+
+        -- Create/Sync matching identity entries in auth.identities
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'auth' AND table_name = 'identities') THEN
+            DELETE FROM auth.identities 
+            WHERE user_id IN (
+                'a0000000-0000-0000-0000-000000000001',
+                'e1000000-0000-0000-0000-000000000001',
+                'e1000000-0000-0000-0000-000000000002',
+                'e1000000-0000-0000-0000-000000000003',
+                'e1000000-0000-0000-0000-000000000004'
+            );
+
+            INSERT INTO auth.identities (
+                id,
+                user_id,
+                provider_id,
+                identity_data,
+                provider,
+                last_sign_in_at,
+                created_at,
+                updated_at
+            )
+            SELECT 
+                gen_random_uuid(),
+                u.id,
+                u.id::text,
+                format('{"sub":"%s","email":"%s"}', u.id::text, u.email)::jsonb,
+                'email',
+                now(),
+                now(),
+                now()
+            FROM auth.users u
+            WHERE u.id IN (
+                'a0000000-0000-0000-0000-000000000001',
+                'e1000000-0000-0000-0000-000000000001',
+                'e1000000-0000-0000-0000-000000000002',
+                'e1000000-0000-0000-0000-000000000003',
+                'e1000000-0000-0000-0000-000000000004'
+            );
+        END IF;
     END IF;
 EXCEPTION
     WHEN OTHERS THEN
-        -- If running outside Supabase superuser context, ignore auth.users error
         NULL;
 END $$;
 
