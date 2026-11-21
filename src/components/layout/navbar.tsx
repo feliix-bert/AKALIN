@@ -144,18 +144,10 @@ export const Navbar: React.FC = () => {
       <nav className="sticky top-0 z-40 w-full bg-[#FAF8F5]/95 dark:bg-[#121316]/95 backdrop-blur-md border-b border-[#25251F]/10 dark:border-stone-800 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
-            {/* 1. Left: Brand & Tagline */}
+            {/* 1. Left: Brand */}
             <div className="flex items-center gap-3 shrink-0">
               <Link href="/" className="flex items-center gap-3 group">
                 <Logo size="md" />
-                <div className="hidden xl:flex flex-col border-l border-[#25251F]/15 dark:border-stone-800 pl-3">
-                  <span className="text-[11px] uppercase font-bold tracking-widest text-[#009B75] font-mono">
-                    Ruang Kos Cerdas
-                  </span>
-                  <span className="text-[10px] text-[#5E5E52] dark:text-stone-400 font-sans">
-                    3D Spatial Interior Planner
-                  </span>
-                </div>
               </Link>
             </div>
 
