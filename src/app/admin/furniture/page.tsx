@@ -282,6 +282,9 @@ export default function AdminFurniturePage() {
                             src={item.thumbnail_url}
                             alt={item.name}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.src = "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&auto=format&fit=crop&q=60";
+                            }}
                           />
                         </div>
                         <div>

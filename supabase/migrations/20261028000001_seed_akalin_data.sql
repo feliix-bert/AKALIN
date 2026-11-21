@@ -166,15 +166,15 @@ ON CONFLICT (slug) DO UPDATE SET
 
 -- 5. SEED FURNITURE CATALOG (12 Core Standardized 3D Modules)
 INSERT INTO public.furniture_items (id, name, slug, category, description, width, depth, height, thumbnail_url, model_type, price_estimate, color, is_active) VALUES
-('f1000000-0000-0000-0000-000000000001', 'Kasur Single 90x200 Minimalis', 'kasur-single-90x200', 'bed', 'Ranjang single kayu solid dengan dipan rendah dan kasur busa empuk, ideal untuk kamar kost standar.', 0.90, 2.00, 0.50, 'https://images.unsplash.com/photo-1540518614846-7ede433c4ef5?w=500&auto=format&fit=crop&q=60', 'procedural', 1250000, '#E2DCD5', true),
+('f1000000-0000-0000-0000-000000000001', 'Kasur Single 90x200 Minimalis', 'kasur-single-90x200', 'bed', 'Ranjang single kayu solid dengan dipan rendah dan kasur busa empuk, ideal untuk kamar kost standar.', 0.90, 2.00, 0.50, 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=500&auto=format&fit=crop&q=60', 'procedural', 1250000, '#E2DCD5', true),
 
 ('f1000000-0000-0000-0000-000000000002', 'Tempat Tidur Queen 160x200', 'tempat-tidur-queen-160x200', 'bed', 'Tempat tidur queen size dengan headboard minimalis berlapis busa linen lembut.', 1.60, 2.00, 0.85, 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=500&auto=format&fit=crop&q=60', 'procedural', 2400000, '#C5BCB3', true),
 
 ('f1000000-0000-0000-0000-000000000003', 'Meja Belajar Kayu Compact', 'meja-belajar-kayu-compact', 'desk', 'Meja kerja kayu oak berdesain ramping dilengkapi laci samping untuk laptop dan dokumen.', 1.00, 0.60, 0.75, 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=500&auto=format&fit=crop&q=60', 'procedural', 650000, '#C29B6C', true),
 
-('f1000000-0000-0000-0000-000000000004', 'Kursi Kerja Ergonomis Mesh', 'kursi-kerja-ergonomis-mesh', 'chair', 'Kursi putar dengan sandaran punggung jaring bernapas dan bantalan duduk tebal.', 0.60, 0.60, 0.95, 'https://images.unsplash.com/photo-1580481077194-e405a108b532?w=500&auto=format&fit=crop&q=60', 'procedural', 550000, '#333333', true),
+('f1000000-0000-0000-0000-000000000004', 'Kursi Kerja Ergonomis Mesh', 'kursi-kerja-ergonomis-mesh', 'chair', 'Kursi putar dengan sandaran punggung jaring bernapas dan bantalan duduk tebal.', 0.60, 0.60, 0.95, 'https://images.unsplash.com/photo-1589384267710-7a170981ca78?w=500&auto=format&fit=crop&q=60', 'procedural', 550000, '#333333', true),
 
-('f1000000-0000-0000-0000-000000000005', 'Lemari Pakaian 2 Pintu Minimalis', 'lemari-pakaian-2-pintu', 'wardrobe', 'Lemari pakaian 2 pintu dengan sekat gantungan baju dan rak tumpuk di bagian bawah.', 0.80, 0.50, 1.80, 'https://images.unsplash.com/photo-1558997519-83ea9252def8?w=500&auto=format&fit=crop&q=60', 'procedural', 1100000, '#DFD8D0', true),
+('f1000000-0000-0000-0000-000000000005', 'Lemari Pakaian 2 Pintu Minimalis', 'lemari-pakaian-2-pintu', 'wardrobe', 'Lemari pakaian 2 pintu dengan sekat gantungan baju dan rak tumpuk di bagian bawah.', 0.80, 0.50, 1.80, 'https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=500&auto=format&fit=crop&q=60', 'procedural', 1100000, '#DFD8D0', true),
 
 ('f1000000-0000-0000-0000-000000000006', 'Rak Buku Terbuka 4 Tingkat', 'rak-buku-terbuka-4-tingkat', 'storage', 'Rak kayu terbuka 4 ambalan kokoh untuk buku kuliah, tanaman pot sukulen, dan hiasan.', 0.60, 0.30, 1.40, 'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?w=500&auto=format&fit=crop&q=60', 'procedural', 380000, '#B88E5A', true),
 

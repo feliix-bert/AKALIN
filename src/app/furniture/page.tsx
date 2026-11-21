@@ -189,6 +189,9 @@ export default function FurnitureCatalogPage() {
                       alt={item.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&auto=format&fit=crop&q=60";
+                      }}
                     />
                     <div className="absolute top-3 left-3 flex items-center gap-1.5">
                       <span className="px-2.5 py-1 rounded-full bg-white/95 dark:bg-stone-900/95 backdrop-blur-md text-[#25251F] dark:text-white text-[10px] font-bold uppercase tracking-wider shadow-2xs font-mono">
